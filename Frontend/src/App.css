@@ -1,0 +1,14 @@
+* {
+    color: #ececec;
+    font-family: 'Inter', Roboto, 'Open sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.app {
+    background-color: rgba(59,130,246,0.5);
+    display: flex;
+}
