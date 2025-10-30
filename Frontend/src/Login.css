@@ -1,0 +1,104 @@
+    html,
+    body,
+    #root {
+        height: 100%;
+    }
+
+    .auth-bg {
+        min-height: 100vh;
+        width: 100vw;
+        background: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2;
+    }
+
+    .auth-card {
+        background: #fff;
+        padding: 2rem 3rem;
+        border-radius: 1.3rem;
+        max-width: 370px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .auth-card:hover {
+        box-shadow: 4px 4px 20px 0 rgba(208, 255, 0, 0.32);
+        transition: box-shadow 0.2s;
+    }
+
+    .auth-card h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #183465;
+        text-align: center;
+    }
+
+    .auth-input {
+        color: black;
+        border: 1px solid #bcccde;
+        border-radius: 0.7rem;
+        padding: 0.8rem 1rem;
+        font-size: 1.1rem;
+        outline: none;
+        margin-bottom: 0.25rem;
+        background: #f7faff;
+    }
+
+    .auth-btn {
+        background: #316cec;
+        color: #fff;
+        border: none;
+        border-radius: 0.7rem;
+        padding: 0.87rem 0;
+        font-size: 1.16rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 1px 10px 0 rgba(49, 108, 236, 0.08);
+        transition: background 0.2s;
+    }
+
+    .auth-btn:hover {
+        background: #124db4;
+    }
+
+    .switch-link {
+        font-size: 1rem;
+        color: #4e6a97;
+        text-align: center;
+    }
+
+    .switch-link a {
+        color: #316cec;
+        text-decoration: underline;
+        margin-left: 4px;
+    }
+
+    .auth-google-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        color: #444;
+        border: 1px solid #bbb;
+        border-radius: 0.7rem;
+        font-size: 1.13rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.7rem 0;
+        margin-bottom: 0.7rem;
+        margin-top: 0.2rem;
+      }
+      .auth-google-btn:hover {
+        background: #f9f9f9;
+        border-color: #888;
+      }

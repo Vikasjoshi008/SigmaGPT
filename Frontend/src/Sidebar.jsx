@@ -2,9 +2,12 @@ import "./Sidebar.css";
 import { MyContext } from "./MyContext";
 import { useContext, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { Link } from "react-router-dom";
 
 function Sidebar() {
   const {
+    sidebarOpen,
+    setSidebarOpen,
     allThreads,
     setAllThreads,
     currThreadId,
@@ -14,19 +17,28 @@ function Sidebar() {
     setCurrThreadId,
     setPrevChats,
   } = useContext(MyContext);
+  
+  if (!sidebarOpen) return null; // ✅ hide sidebar when collapsed
+
 
   const getAllThreads = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/thread");
+      const response = await fetch("http://localhost:8080/api/history", {
+        credentials: "include", // include cookies for auth
+      });
       const res = await response.json();
+      if (!Array.isArray(res)) {
+        console.error("Unexpected response:", res);
+        return;
+      }
       const filteredData = res.map((thread) => ({
         threadId: thread.threadId,
         title: thread.title,
       }));
-      // console.log(filteredData);
       setAllThreads(filteredData);
     } catch (err) {
       console.log(err);
+      setAllThreads([]);
     }
   };
 
@@ -47,7 +59,8 @@ function Sidebar() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/thread/${newThreadId}`
+        `http://localhost:8080/api/thread/${newThreadId}`,
+        {credentials: "include"}
       );
       const res = await response.json();
       console.log(res);
@@ -61,7 +74,10 @@ function Sidebar() {
 
   const deleteThread = async(threadId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/thread/${threadId}`, {method: "DELETE"});
+      const response = await fetch(
+        `http://localhost:8080/api/thread/${threadId}`, 
+        {method: "DELETE", credentials: "include"}, 
+      );
       const res=await response.json();
       console.log(res);
       //updated threads re-render
@@ -78,6 +94,14 @@ function Sidebar() {
   }
   return (
     <section className="sidebar">
+       {/* Collapse button inside sidebar */}
+      <div className="collapseBtn" onClick={() => {setSidebarOpen(false)}}>
+        <i className="fa-solid fa-xmark"></i>
+      </div>
+              {/* Logo at top */}
+        <div className="sidebarLogo">
+          <h3>SigmaGPT</h3>
+        </div>
       {/* new chat button */}
       <button onClick={createNewChat}>
         <i className="fa-solid fa-pen-to-square"></i>&nbsp;New chat
@@ -85,18 +109,23 @@ function Sidebar() {
 
       {/* history */}
       <ul className="history">
-        {allThreads?.map((thread, idx) => (
-          <li key={idx} onClick={() => changeThread(thread.threadId)}
-          className={thread.threadId === currThreadId ? "highlighted" : ""}>
-            {thread.title}
-            <i className="fa-solid fa-trash"
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteThread(thread.threadId)
-            }}
-            ></i>
-          </li>
-        ))}
+        {allThreads?.length === 0 ? (
+          <li className="no-history-msg"><h3>No history available.</h3></li>
+        ) : (
+          allThreads.map((thread, idx) => (
+            <li key={idx} onClick={() => changeThread(thread.threadId)}
+              className={thread.threadId == currThreadId ? "highlighted" : ""}
+            >
+              {thread.title}
+              <i className="fa-solid fa-trash"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteThread(thread.threadId);
+                }}
+              ></i>
+            </li>
+          ))
+        )}
       </ul>
 
       {/* sign */}

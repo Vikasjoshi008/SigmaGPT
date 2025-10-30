@@ -1,65 +1,40 @@
 import express, { json } from "express";
+import session from "express-session";
 import fetch from "node-fetch";
 import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
 import cors from "cors";
 import mongoose from "mongoose";
-import chartRoutes from "./routes/chat.js";
+import chatRoutes from "./routes/chat.js";
+import authRoutes from "./routes/auth.js"
+import passport from "passport";
+import "./config/passport.js"; // ✅ this loads LocalStrategy
 
 const app = express();
 const PORT = 8080;
 app.use(express.json());
-app.use(cors());
 
-app.use("/api", chartRoutes);
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
 
-// const API_KEY = process.env.GEMINI_API_KEY;
-// app.post("/test", async (req, res) => {
-//   try {
-//     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+app.use(session({
+  secret: process.env.my_session_secret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+      httpOnly: true,
+      secure: false, // ✅ set to true only in production with HTTPS
+      sameSite: "lax"
+  }
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-//     const payload = {
-//       contents: [
-//         {
-//           role: "user",
-//           parts: [
-//             { text: req.body.prompt || "Hello!" }
-//           ]
-//         }
-//       ]
-//     };
-
-//     const response = await fetch(url, {
-//       method: "POST",
-//       headers: { 
-//         "Content-Type": "application/json" 
-//       },
-//       body: JSON.stringify(payload)
-//     });
-
-//     const rawText = await response.text(); // Read once
-
-//     let data;
-//     try {
-//       data = JSON.parse(rawText); // Parse from rawText
-//     } catch (err) {
-//       console.error("Failed to parse JSON:", err.message);
-//       return res.status(500).send({ error: "Invalid JSON from Gemini", details: rawText });
-//     }
-
-//     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-//     if (text) {
-//       console.log("Gemini response:", text);
-//       res.send({ response: text });
-//     } else {
-//       console.error("Unexpected response format:", data);
-//       res.status(500).send({ error: "Unexpected response format", details: data });
-//     }
-
-//   } catch (err) {
-//     console.error("Internal error:", err.message);
-//     res.status(500).send({ error: "Internal server error", details: err.message });
-//   }
-// });
+app.use("/api/auth", authRoutes); // ✅ this enables /api/auth/google
+app.use("/api", chatRoutes);
 
 app.listen(PORT, () => {
   console.log("server is runnig on port",PORT);

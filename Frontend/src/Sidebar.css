@@ -1,4 +1,8 @@
 .sidebar {
+    position: fixed;              /* ✅ float above layout */
+    top: 0;
+    left: 0;
+    z-index: 1000;    
     background-color: #0c0e26;
     color: #b4b4b4;
     height: 100vh;
@@ -76,4 +80,21 @@ button:hover {
 .highlighted {
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
+}
+
+.collapseBtn {
+  z-index: 1100;
+  padding: 10px;
+  text-align: right;
+  cursor: pointer;
+  font-size: 20px;
+  color: #b4b4b4;
+}
+
+.sidebarLogo {
+  padding: 0px 5px 0 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  text-align: left;
 }

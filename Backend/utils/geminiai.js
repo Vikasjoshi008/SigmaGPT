@@ -39,7 +39,7 @@ const getGeminiAIAPIResponse=async(message) => {
           return ({ response: text });
         } else {
           console.error("Unexpected response format:", data);
-          res.status(500).send({ error: "Unexpected response format", details: data });
+          throw new Error("Unexpected response format");
         }
     
       } catch (err) {

@@ -8,6 +8,21 @@
   }
 }
 
+@media (max-width: 768px) {
+    .chats {
+        padding: 4rem;
+        overflow-y: scroll;
+        -ms-overflow-style: none;
+        &::-webkit-scrollbar {
+        display: none;
+    }
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
 .userDiv {
     display: flex;
     justify-content: flex-end;
@@ -34,4 +49,27 @@
 
 pre {
     white-space: pre-wrap;
+}
+
+.multiColorName > b{
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6b6b, #f7d794, #6bc1ff, #a29bfe, #55efc4);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbowShift 5s ease infinite;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+    .multiColorName > b {
+        font-size: 1.5rem;
+    }
+}
+
+@keyframes rainbowShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

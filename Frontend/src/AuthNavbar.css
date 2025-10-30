@@ -1,0 +1,48 @@
+.authNavbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em 2em;
+  background-color: #1e1e1e;
+  color: white;
+  border-bottom: 1px solid #333;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navAction .navBtn {
+  background-color: #4f46e5;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.navBtn:hover {
+  background-color: #6366f1;
+}
+
+@media (max-width: 480px) {
+  .authNavbar {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .navBtn {
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+}
