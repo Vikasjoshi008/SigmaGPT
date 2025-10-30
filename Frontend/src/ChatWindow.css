@@ -10,7 +10,7 @@
 
 @media (max-width: 768px) {
     .chatWindow {
-        min-height: 100dvh; /* ✅ dynamic viewport height */
+        min-height: 100dvh;
     }
 }
 
@@ -30,17 +30,6 @@
 .userIconDiv {
     margin: 0rem 2rem;
 }
-
-/* .userIcon {
-    background-color: #050e1c;
-    height: 25px;
-    width: 25px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-} */
 
 .userIcon {
   background-color: #444;
