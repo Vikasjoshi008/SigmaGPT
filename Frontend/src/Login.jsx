@@ -17,7 +17,7 @@ const handleGoogleLogin = async (credentialResponse) => {
   console.log("Google user:", decoded);
 
   try {
-    const res = await fetch("http://localhost:8080/api/auth/google", {
+    const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
       method: "POST",
       credentials: "include",
       headers: {
@@ -42,7 +42,7 @@ const handleGoogleLogin = async (credentialResponse) => {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/auth/login", {
+      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/login", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

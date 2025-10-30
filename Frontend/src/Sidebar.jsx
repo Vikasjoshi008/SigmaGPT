@@ -23,7 +23,7 @@ function Sidebar() {
 
   const getAllThreads = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/history", {
+      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/history", {
         credentials: "include", // include cookies for auth
       });
       const res = await response.json();
@@ -59,7 +59,7 @@ function Sidebar() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/thread/${newThreadId}`,
+        `https://sigmagpt-fgqc.onrender.com/api/thread/${newThreadId}`,
         {credentials: "include"}
       );
       const res = await response.json();
@@ -75,7 +75,7 @@ function Sidebar() {
   const deleteThread = async(threadId) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/thread/${threadId}`, 
+        `https://sigmagpt-fgqc.onrender.com/api/thread/${threadId}`, 
         {method: "DELETE", credentials: "include"}, 
       );
       const res=await response.json();

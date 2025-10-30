@@ -13,7 +13,7 @@ function Signup() {
 
   const handleSignup = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/auth/signup", {
+      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/signup", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -47,7 +47,7 @@ function Signup() {
             const token = credentialResponse.credential;
 
             try {
-              const res = await fetch("http://localhost:8080/api/auth/google", {
+              const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
                 method: "POST",
                 credentials: "include", // ✅ important for session cookies
                 headers: {
