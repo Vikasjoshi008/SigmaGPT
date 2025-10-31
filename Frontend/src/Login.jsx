@@ -48,7 +48,7 @@ const handleGoogleLogin = async (credentialResponse) => {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-           if (!email || !password) {
+      if (!email || !password) {
         alert("All fields are required");
         return;
       }

@@ -26,15 +26,15 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
       maxAge: 25 * 60 * 60 * 1000,
-      secure: true, // ✅ set to true only in production with HTTPS
+      secure: process.env.NODE_ENV === "production", // ✅ set to true only in production with HTTPS
       sameSite: "none"
   }
 }));
 
-// app.use((req, res, next) => {
-//   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-//   next();
-// });
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
 
 
 app.use(passport.initialize());

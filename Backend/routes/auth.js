@@ -27,7 +27,7 @@ router.post("/google", async (req, res) => {
       user = new User({
         name,
         email,
-        authProvider: "google" // or leave blank/null if you update schema
+        authProvider,
       });
       await user.save();
     }
