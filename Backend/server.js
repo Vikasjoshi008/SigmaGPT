@@ -31,10 +31,10 @@ app.use(session({
   }
 }));
 
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+//   next();
+// });
 
 
 app.use(passport.initialize());
