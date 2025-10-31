@@ -20,11 +20,12 @@ function Signup() {
         body: JSON.stringify({ name, email, password })
       });
       const data = await res.json();
-      if (!name || !email || !password) {
+       if (!name || !email || !password) {
         alert("All fields are required");
         return;
       }
-      if (res.ok) {
+
+      if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/chat");
       } else {

@@ -25,7 +25,6 @@ const handleGoogleLogin = async (credentialResponse) => {
       },
       body: JSON.stringify({ token })
     });
-
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -49,6 +48,10 @@ const handleGoogleLogin = async (credentialResponse) => {
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
+           if (!email || !password) {
+        alert("All fields are required");
+        return;
+      }
       if (res.ok) {
             alert("Login successful!");
             localStorage.setItem("user", JSON.stringify(data.user));
