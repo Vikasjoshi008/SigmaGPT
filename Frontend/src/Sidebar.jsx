@@ -23,7 +23,7 @@ function Sidebar() {
 
   const getAllThreads = async () => {
     try {
-      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/thread/history", {
+      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/history", {
         credentials: "include", // include cookies for auth
       });
       const res = await response.json();
