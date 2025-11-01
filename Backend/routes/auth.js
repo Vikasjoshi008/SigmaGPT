@@ -42,6 +42,13 @@ router.post("/google", async (req, res) => {
   }
 });
 
+router.get('/google/callback',
+  passport.authenticate('google', { failureRedirect: 'https://sigma-gpt.vercel.app/login' }),
+  (req, res) => {
+    res.redirect('https://sigma-gpt.vercel.app/chat');
+  }
+);
+
 
 // Signup
 router.post("/signup", async (req, res) => {
