@@ -16,17 +16,18 @@ const PORT = 8080;
 app.use(express.json());
 
 app.use(cors({
-  origin: ["https://sigma-gpt-livid.vercel.app", "http://localhost:5173"],
+  origin: ["https://sigma-gpt-livid.vercel.app", " http://localhost:5173"],
   credentials: true,
 }));
 
+app.set("trust proxy", 1);
 app.use(session({
   secret: process.env.my_session_secret,
   resave: false,
   saveUninitialized: false,
   cookie: {
       maxAge: 25 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === "production", // ✅ set to true only in production with HTTPS
+      secure: true, // ✅ set to true only in production with HTTPS
       sameSite: "none"
   }
 }));

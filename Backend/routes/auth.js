@@ -63,6 +63,13 @@ router.post("/signup", async (req, res) => {
         }
         resolve();
       });
+      req.login(user, err => {
+        if (err) return res.status(500).json({ error: "Login failed" });
+        req.session.save(() => {
+          res.json({ success: "Logged in with Google", user });
+        });
+      });
+
     });
 
     console.log("✅ Logged in user:", user);

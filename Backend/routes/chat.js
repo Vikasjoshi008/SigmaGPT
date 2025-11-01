@@ -87,6 +87,7 @@ router.delete("/thread/:threadId", requireLogin, async(req, res) => {
 
 // updated chat route to associate threads with users
 router.post("/chat", requireLogin, async(req, res) => {
+    console.log("🔍 req.user:", req.user); // <--- Add this
     const {threadId, message} = req.body;
 
     if(!threadId || !message) {
@@ -115,5 +116,6 @@ router.post("/chat", requireLogin, async(req, res) => {
         return res.status(500).json({error: "something went wrong"});
     }
 });
+
 
 export default router;

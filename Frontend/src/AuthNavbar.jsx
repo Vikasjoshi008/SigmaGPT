@@ -4,8 +4,6 @@ import { Link, useLocation } from "react-router-dom";
 function AuthNavbar() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
-  console.log("authnavbar rendered");
-
   return (
     <nav className="authNavbar">
       <div className="logo">SigmaGPT</div>

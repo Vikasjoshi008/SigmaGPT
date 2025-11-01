@@ -23,14 +23,15 @@ function Sidebar() {
 
   const getAllThreads = async () => {
     try {
-      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/history", {
+      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/thread/history", {
         credentials: "include", // include cookies for auth
       });
       const res = await response.json();
       if (!Array.isArray(res)) {
-        console.error("Unexpected response:", res);
-        return;
-      }
+      console.error("Unexpected response:", res);
+      setAllThreads([]);
+      return;
+    }
       const filteredData = res.map((thread) => ({
         threadId: thread.threadId,
         title: thread.title,
