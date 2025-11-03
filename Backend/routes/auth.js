@@ -50,7 +50,7 @@ router.get(
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: 'https://sigma-gpt.vercel.app/login' }),
   (req, res) => {
-    res.redirect('https://sigma-gpt.vercel.app/chat');
+    res.redirect('https://sigma-gpt.vercel.app/#/chat');
   }
 );
 
