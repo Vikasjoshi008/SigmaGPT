@@ -6,7 +6,7 @@ const jwt=require("jsonwebtoken");
 
 const router = express.Router();
 
-function generateToken(user) {
+function generateToken(user) { 
   return jwt.sign(
     { id: user._id, email: user.email },
     process.env.JWT_SECRET,
