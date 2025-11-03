@@ -17,7 +17,6 @@ function Sidebar() {
     setCurrThreadId,
     setPrevChats,
   } = useContext(MyContext);
-  const [loadingThreads, setLoadingThreads] = useState(false);
   
   if (!sidebarOpen) return null; // ✅ hide sidebar when collapsed
 
@@ -48,10 +47,6 @@ function Sidebar() {
     getAllThreads();
   }, [currThreadId]);
 
-  useEffect(() => {
-    setLoadingThreads(true);
-    getAllThreads().finally(() => setLoadingThreads(false));
-  }, []);
 
   const createNewChat = () => {
     setNewChat(true);
