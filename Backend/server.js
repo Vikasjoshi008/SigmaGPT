@@ -17,7 +17,7 @@ const PORT = 8080;
 app.use(express.json());
 
 app.use(cors({
-  origin: ["https://sigma-gpt-livid.vercel.app"],
+  origin: ["https://sigma-gpt-livid.vercel.app" , "http://localhost:5173"],
   credentials: true,
 }));
 
@@ -33,15 +33,14 @@ app.use(session({
   }
 }));
 
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+//   next();
+// });
 
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use("/api/auth", authRoutes); // ✅ this enables /api/auth/google
 app.use("/api", chatRoutes);
 app.use("/api", aiRoutes);
