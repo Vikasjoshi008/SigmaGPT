@@ -97,6 +97,7 @@ router.post("/signup", async (req, res) => {
 // Login
 router.post("/login", passport.authenticate("local"), (req, res) => {
   res.json({ success: "Logged in", user: req.user });
+  res.redirect("https://sigma-gpt.vercel.app/chat");
 });
   
 // Logout
