@@ -12,11 +12,11 @@ import passport from "passport";
 import "./config/passport.js";
 import cookieParser from "cookie-parser";
 
-app.use(cookieParser());
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(cors({
   origin: ["https://sigma-gpt-livid.vercel.app" , "http://localhost:5173"],
