@@ -1,7 +1,7 @@
 import "./Signup.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
+// import { GoogleLogin } from "@react-oauth/google";
 import {jwtDecode} from "jwt-decode";
 import AuthNavbar from "./AuthNavbar.jsx";
 
@@ -43,7 +43,7 @@ function Signup() {
     <div className="auth-bg">
       <div className="auth-card">
         <h2>Sign Up</h2>
-        <GoogleLogin
+        {/* <GoogleLogin
           onSuccess={async (credentialResponse) => {
             const token = credentialResponse.credential;
 
@@ -70,7 +70,16 @@ function Signup() {
             }
           }}
           onError={() => console.log("Google login failed")}
-        ></GoogleLogin>
+        ></GoogleLogin> */}
+        <button
+        type="button"
+        className="auth-google-btn"
+        onClick={() => { 
+          window.location.href = "https://sigmagpt-fgqc.onrender.com/api/auth/google";
+        }}
+      >
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo" /> Continue with Google
+      </button>
 
         <input
           type="text"
