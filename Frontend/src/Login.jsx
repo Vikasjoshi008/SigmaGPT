@@ -1,7 +1,6 @@
 import "./Login.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import AuthNavbar from "./AuthNavbar";
 
@@ -93,10 +92,16 @@ const handleGoogleLogin = async (credentialResponse) => {
         <button className="auth-btn" onClick={handleLogin}>
           Login
         </button>
-        <GoogleLogin
-          onSuccess={handleGoogleLogin}
-          onError={() => console.log("Google login failed")}
-        />
+        <button
+        type="button"
+        className="auth-google-btn"
+        onClick={() => { 
+          window.location.href = "https://sigmagpt-fgqc.onrender.com/api/auth/google";
+        }}
+      >
+        <img src="https://www.google.com/imgres?q=google%20sign%20in%20logo&imgurl=https%3A%2F%2Fmedia.wired.com%2Fphotos%2F5926ffe47034dc5f91bed4e8%2Fmaster%2Fpass%2Fgoogle-logo.jpg&imgrefurl=https%3A%2F%2Fwww.wired.com%2F2015%2F09%2Fgoogles-new-logo-trying-really-hard-look-friendly%2F&docid=xcfO8huj4InxHM&tbnid=yjNF1YrjSqFOpM&vet=12ahUKEwj33qWiq9WQAxWET2wGHS7LDwoQM3oECCIQAA..i&w=1604&h=802&hcb=2&ved=2ahUKEwj33qWiq9WQAxWET2wGHS7LDwoQM3oECCIQAA" alt="Google Logo" /> Continue with Google
+      </button>
+
         <div className="switch-link">
           Don't have an account? <Link to="/">Sign up</Link>
         </div>
