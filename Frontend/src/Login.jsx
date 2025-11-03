@@ -1,8 +1,9 @@
 import "./Login.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-// import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import AuthNavbar from "./AuthNavbar";
+import { GoogleLogin } from "@react-oauth/google";
 
 
 function Login() {
@@ -11,39 +12,38 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-// const handleGoogleLogin = async (credentialResponse) => {
-//   const token = credentialResponse.credential;
-//   const decoded = jwtDecode(token);
-//   console.log("Google user:", decoded);
+const handleGoogleLogin = async (credentialResponse) => {
+  const token = credentialResponse.credential;
+  const decoded = jwtDecode(token);
+  console.log("Google user:", decoded);
 
-//   try {
-//     const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
-//       method: "POST",
-//       credentials: "include",
-//       headers: {
-//         "Content-Type": "application/json"
-//       },
-//       body: JSON.stringify({ token })
-//     });
-//     const data = await res.json();
-//     if (res.ok) {
-//       localStorage.setItem("user", JSON.stringify(data.user));
-//       navigate("/chat");
-//     } else {
-//       alert(data.error || "Google login failed");
-//     }
-//   } catch (err) {
-//     console.error("Google login error:", err);
-//     alert("Server error");
-//   }
-// };
+  try {
+    const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ token })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/chat");
+    } else {
+      alert(data.error || "Google login failed");
+    }
+  } catch (err) {
+    console.error("Google login error:", err);
+    alert("Server error");
+  }
+};
 
 
   const handleLogin = async () => {
     try {
       const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/login", {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
@@ -55,6 +55,7 @@ function Login() {
       }
       if (res.ok) {
             alert("Login successful!");
+            localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
             navigate("/chat");
       } else {
@@ -90,19 +91,13 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           className="auth-input"
         />
+        <GoogleLogin
+        onSuccess={handleGoogleLogin}
+        onError={() => console.log("Google login failed")}
+      />
         <button className="auth-btn" disabled={loading} onClick={handleLogin}>
           {loading ? "Logging in..." : "Login"}
         </button>
-        <button
-        type="button"
-        className="auth-google-btn"
-        onClick={() => { 
-          window.location.href = "https://sigmagpt-fgqc.onrender.com/api/auth/google";
-        }}
-      >
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo" />
-        Continue with Google
-      </button>
 
         <div className="switch-link">
           Don't have an account? <Link to="/">Sign up</Link>

@@ -1,6 +1,7 @@
 import express from 'express';
 import Thread from '../models/Thread.js'
 import  getGeminiAIAPIResponse from "../utils/geminiai.js"
+import {requireAuth} from './requireAuth.js'
 
 const router=express.Router();
 
@@ -12,7 +13,7 @@ function requireLogin(req, res, next) {
     next();
 }
 
-router.get("/user", requireLogin, async (req, res) => {
+router.get("/user", requireLogin, requireAuth, async (req, res) => {
     try {
         const threads = await Thread.find({ user: req.user._id });
         res.json(threads);
@@ -39,7 +40,7 @@ router.post("/test", async(req, res) => {
 });
 
 //get all threads
-router.get("/thread", requireLogin, async(req, res) => {
+router.get("/thread", requireLogin, requireAuth, async(req, res) => {
     try {
         const threads=await Thread.find({}).sort({updatedAt: -1});
         res.json(threads);
@@ -50,7 +51,7 @@ router.get("/thread", requireLogin, async(req, res) => {
 });
 
 // get all threads for the logged-in user
-router.get("/history", requireLogin, async(req, res) => {
+router.get("/history", requireLogin, requireAuth, async(req, res) => {
     try {
         const threads = await Thread.find({ user: req.user._id }).sort({updatedAt: -1});
         res.json(threads);
@@ -60,7 +61,7 @@ router.get("/history", requireLogin, async(req, res) => {
 });
 
 // update get thread by id for user
-router.get("/thread/:threadId", requireLogin, async(req, res) => {
+router.get("/thread/:threadId", requireLogin, requireAuth,async(req, res) => {
     const {threadId} = req.params;
     try {
         const thread=await Thread.findOne({threadId, user: req.user._id});
@@ -74,7 +75,7 @@ router.get("/thread/:threadId", requireLogin, async(req, res) => {
 });
 
 // update delete thread for user
-router.delete("/thread/:threadId", requireLogin, async(req, res) => {
+router.delete("/thread/:threadId", requireLogin, requireAuth, async(req, res) => {
   try {
     const threadId = req.params.threadId?.trim();
     const deletedThread = await Thread.findOneAndDelete({ threadId, user: req.user._id });
@@ -89,7 +90,7 @@ router.delete("/thread/:threadId", requireLogin, async(req, res) => {
 ////////chat user history
 
 // updated chat route to associate threads with users
-router.post("/chat", requireLogin, async(req, res) => {
+router.post("/chat", requireLogin, requireAuth, async(req, res) => {
     console.log("🔍 req.user:", req.user); // <--- Add this
     const {threadId, message} = req.body;
 

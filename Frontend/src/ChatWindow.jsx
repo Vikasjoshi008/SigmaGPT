@@ -23,6 +23,8 @@ function ChatWindow() {
     const [isopen, setIsOpen]=useState(false);
     const navigate = useNavigate();
 
+    const token = localStorage.getItem("token");
+
     let user = null;
     try {
       user = JSON.parse(localStorage.getItem("user"));
@@ -37,9 +39,10 @@ function ChatWindow() {
     console.log("message", prompt, "threadId", currThreadId);
         const options= {
             method: "post",
-            credentials: "include", // <-- Ensure session/cookies go with request
+            // credentials: "include", // <-- Ensure session/cookies go with request
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify({
                 message: prompt,
