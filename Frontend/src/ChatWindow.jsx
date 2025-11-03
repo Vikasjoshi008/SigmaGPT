@@ -43,7 +43,7 @@ function ChatWindow() {
         };
 
         try {
-            const response=await fetch("https://sigmagpt-fgqc.onrender.com/api/chat", options);
+            const response=await fetch("https://sigmagpt-fgqc.onrender.com/api/ai/chat", options);
             const res=await response.json()
             console.log(res.reply);
             setReply(res.reply);

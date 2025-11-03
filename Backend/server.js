@@ -10,6 +10,7 @@ import chatRoutes from "./routes/chat.js";
 import authRoutes from "./routes/auth.js"
 import passport from "passport";
 import "./config/passport.js"; // ✅ this loads LocalStrategy
+import aiRoutes from "./routes/ai.js";
 
 const app = express();
 const PORT = 8080;
@@ -43,6 +44,7 @@ app.use(passport.session());
 
 app.use("/api/auth", authRoutes); // ✅ this enables /api/auth/google
 app.use("/api", chatRoutes);
+app.use("/api", aiRoutes);
 
 app.listen(PORT, () => {
   console.log("server is runnig on port",PORT);
