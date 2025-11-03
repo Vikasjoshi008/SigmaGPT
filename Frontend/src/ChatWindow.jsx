@@ -22,9 +22,14 @@ function ChatWindow() {
     const [loading, setLoading]=useState(false);
     const [isopen, setIsOpen]=useState(false);
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user"));
 
-
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user"));
+    } catch (err) {
+      console.error("❌ Failed to parse user:", err);
+    }
+    
 
     const getReply = async() => {
     setLoading(true);
@@ -139,8 +144,11 @@ useEffect(() => {
           <input type="text" placeholder="Ask SigmaGPT"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" ? getReply() : ''} />
-          <div id="submit" onClick={getReply}>
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && prompt.trim()) getReply();
+          }}
+          />
+          <div id="submit" onClick={() => prompt.trim() && getReply()}>
             <i className="fa-solid fa-paper-plane"></i>
           </div>
         </div>

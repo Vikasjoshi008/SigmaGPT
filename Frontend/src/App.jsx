@@ -27,7 +27,21 @@ function App() {
     sidebarOpen, setSidebarOpen
   };
 
-  const user = localStorage.getItem("user");
+  useEffect(() => {
+    fetch("https://sigmagpt-fgqc.onrender.com/api/test-session", {
+      credentials: "include"
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        } else {
+          localStorage.removeItem("user");
+        }
+      });
+  }, []);
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
 
   return (
     <div className="app">

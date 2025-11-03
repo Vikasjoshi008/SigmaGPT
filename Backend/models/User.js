@@ -15,12 +15,12 @@ const UserSchema = new mongoose.Schema({
     required: function () {
       return this.authProvider !== "google";
     },
+  },
     authProvider: {
     type: String,
     enum: ["local", "google"],
     default: "local"
-  }
   },
-});
+}, {timestamps: true});
 
 export default mongoose.model("User", UserSchema);

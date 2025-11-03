@@ -17,6 +17,7 @@ function Sidebar() {
     setCurrThreadId,
     setPrevChats,
   } = useContext(MyContext);
+  const [loadingThreads, setLoadingThreads] = useState(false);
   
   if (!sidebarOpen) return null; // ✅ hide sidebar when collapsed
 
@@ -46,6 +47,11 @@ function Sidebar() {
   useEffect(() => {
     getAllThreads();
   }, [currThreadId]);
+
+  useEffect(() => {
+    setLoadingThreads(true);
+    getAllThreads().finally(() => setLoadingThreads(false));
+  }, []);
 
   const createNewChat = () => {
     setNewChat(true);
@@ -121,6 +127,7 @@ function Sidebar() {
               <i className="fa-solid fa-trash"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (!window.confirm("Are you sure you want to delete this thread?")) return;
                   deleteThread(thread.threadId);
                 }}
               ></i>

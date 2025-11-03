@@ -12,11 +12,14 @@ function requireLogin(req, res, next) {
     next();
 }
 
-router.get("/user", async (req, res) => {
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-  const threads = await Thread.find({ user: req.user._id });
-  res.json(threads);
+router.get("/user", requireLogin, async (req, res) => {
+    try {
+        const threads = await Thread.find({ user: req.user._id });
+        res.json(threads);
+    } catch (err) {
+        console.error("❌ Failed to fetch user threads:", err);
+        res.status(500).json({ error: "Failed to fetch threads" });
+    }
 });
 
 
@@ -36,7 +39,7 @@ router.post("/test", async(req, res) => {
 });
 
 //get all threads
-router.get("/thread", async(req, res) => {
+router.get("/thread", requireLogin, async(req, res) => {
     try {
         const threads=await Thread.find({}).sort({updatedAt: -1});
         res.json(threads);
@@ -106,7 +109,7 @@ router.post("/chat", requireLogin, async(req, res) => {
             thread.messages.push({role: "user", content: message});
         }
         const assistantReply= await getGeminiAIAPIResponse(message);
-        const replyText=assistantReply.response;
+        const replyText=assistantReply.response || "Sorry, I couldn't generate a reply.";
         thread.messages.push({ role: "assistant", content: replyText });
         thread.updatedAt=new Date();
         await thread.save();

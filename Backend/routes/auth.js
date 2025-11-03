@@ -63,7 +63,7 @@ router.post("/signup", async (req, res) => {
     if (existing) return res.status(400).json({ error: "Email already registered" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashed });
+    const user = new User({ name, email, password: hashed , authProvider: "local"});
     await user.save();
 
     // ✅ Wrap req.login in a Promise
@@ -71,17 +71,12 @@ router.post("/signup", async (req, res) => {
       req.login(user, (err) => {
         if (err) {
           console.error("❌ Login after signup failed:", err);
-          return reject(err);
+          return res.status(500).json({ error: "Login failed" });
         }
-        resolve();
-      });
-      req.login(user, err => {
-        if (err) return res.status(500).json({ error: "Login failed" });
         req.session.save(() => {
-          res.json({ success: "Logged in with Google", user });
+          res.json({ success: "Signed up and logged in", user });
         });
       });
-
     });
 
     console.log("✅ Logged in user:", user);
@@ -96,8 +91,21 @@ router.post("/signup", async (req, res) => {
 
 // Login
 router.post("/login", passport.authenticate("local"), (req, res) => {
-  res.json({ success: "Logged in", user: req.user });
-  res.redirect("https://sigma-gpt.vercel.app/chat");
+  // res.json({ success: "Logged in", user: req.user });
+  // req.session.save(() => {
+  //   res.redirect("https://sigma-gpt.vercel.app/chat");
+  // });
+  passport.authenticate("local", (err, user, info) => {
+    if (err || !user) return res.status(401).json({ error: "Login failed" });
+  
+    req.login(user, err => {
+      if (err) return res.status(500).json({ error: "Login failed" });
+      req.session.save(() => {
+        res.json({ success: "Logged in", user });
+      });
+    });
+  })(req, res);
+  
 });
   
 // Logout

@@ -21,7 +21,7 @@ async (accessToken, refreshToken, profile, done) => {
       user = new User({
         name: profile.displayName,
         email: profile.emails[0].value,
-        password: "google-oauth" // Could use null, but needs to fit schema
+        password: null, // Could use null, but needs to fit schema
       });
       await user.save();
     }
@@ -49,14 +49,17 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
+  console.log("✅ Serializing user:", user._id);
   done(null, user._id);
 });
 
 passport.deserializeUser(async(id, done) => {
   try {
     const user=await User.findById(id);
+    console.log("✅ Deserialized user:", user?.email);
     done(null, user);
   } catch(err) {
+    console.error("❌ Deserialization error:", err);
     done(err);
   }
 });

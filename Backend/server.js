@@ -9,11 +9,13 @@ import mongoose from "mongoose";
 import chatRoutes from "./routes/chat.js";
 import authRoutes from "./routes/auth.js"
 import passport from "passport";
-import "./config/passport.js"; // ✅ this loads LocalStrategy
-import aiRoutes from "./routes/ai.js";
+import "./config/passport.js";
+import cookieParser from "cookie-parser";
+
+app.use(cookieParser());
 
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 app.use(express.json());
 
 app.use(cors({
@@ -43,7 +45,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use("/api/auth", authRoutes); // ✅ this enables /api/auth/google
 app.use("/api", chatRoutes);
-app.use("/api", aiRoutes);
 
 app.listen(PORT, () => {
   console.log("server is runnig on port",PORT);

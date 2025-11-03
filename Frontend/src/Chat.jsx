@@ -12,7 +12,14 @@ function Chat() {
     const chatsContainerRef = useRef(null);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
     const userScrolledRef = useRef(false);
-    const user = JSON.parse(localStorage.getItem("user"));
+
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user"));
+    } catch (err) {
+      console.error("❌ Failed to parse user:", err);
+    }
+          
 
      const scrollToBottom = () => {
         chatsEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,6 +53,18 @@ function Chat() {
 
     }, [prevChats, reply]);
 
+    useEffect(() => {
+        const el = chatsContainerRef.current;
+        const handleScroll = () => {
+          const bottom = el.scrollHeight - el.scrollTop === el.clientHeight;
+          setShouldAutoScroll(bottom);
+          userScrolledRef.current = !bottom;
+        };
+        el?.addEventListener("scroll", handleScroll);
+        return () => el?.removeEventListener("scroll", handleScroll);
+      }, []);
+      
+
     return ( 
         <>
             {newChat && <h1 className="multiColorName">Hi <b> {user?.name}</b>, How can i help you</h1>}
@@ -76,6 +95,10 @@ function Chat() {
                                     </div>
                                 )
                             }   
+                            {
+                            latestReply !== null && latestReply.length < reply.length && (
+                                <div className="typing-indicator">Typing...</div>
+                                )}
                         </>
                     )
                 }

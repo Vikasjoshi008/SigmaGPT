@@ -8,6 +8,7 @@ function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = async () => {
@@ -23,8 +24,12 @@ function Signup() {
         alert("All fields are required");
         return;
       }
+      if (password.length < 6) {
+        alert("Password must be at least 6 characters");
+        return;
+      }      
 
-      if (data.user) {
+      if (res.ok && data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/chat");
       } else {
@@ -101,8 +106,8 @@ function Signup() {
           onChange={(e) => setPassword(e.target.value)}
           className="auth-input"
         />
-        <button className="auth-btn" onClick={handleSignup}>
-          Create Account
+        <button className="auth-btn" disabled={loading} onClick={handleSignup}>
+        {loading ? "Creating account..." : "Create Account"}
         </button>
         <div className="switch-link">
           Already have an account? <Link to="/login">Login</Link>
