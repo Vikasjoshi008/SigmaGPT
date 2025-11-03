@@ -96,9 +96,16 @@ router.post("/signup", async (req, res) => {
 
 // Login
 router.post("/login", passport.authenticate("local"), (req, res) => {
-  res.json({ success: "Logged in", user: req.user });
-});
-
+  // res.json({ success: "Logged in", user: req.user });
+    req.login(req.body.user, err => {
+      if (err) return res.status(500).json({ error: "Login failed" });
+      req.session.save(() => {
+        console.log("🔐 Session ID:", req.sessionID);
+        res.json({ success: true });
+      });
+    });
+  });
+  
 // Logout
 router.post("/logout", (req, res) => {
   req.logout(err => {
