@@ -1,7 +1,7 @@
 import "./Login.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 import AuthNavbar from "./AuthNavbar";
 
 
@@ -10,32 +10,32 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-const handleGoogleLogin = async (credentialResponse) => {
-  const token = credentialResponse.credential;
-  const decoded = jwtDecode(token);
-  console.log("Google user:", decoded);
+// const handleGoogleLogin = async (credentialResponse) => {
+//   const token = credentialResponse.credential;
+//   const decoded = jwtDecode(token);
+//   console.log("Google user:", decoded);
 
-  try {
-    const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ token })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/chat");
-    } else {
-      alert(data.error || "Google login failed");
-    }
-  } catch (err) {
-    console.error("Google login error:", err);
-    alert("Server error");
-  }
-};
+//   try {
+//     const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
+//       method: "POST",
+//       credentials: "include",
+//       headers: {
+//         "Content-Type": "application/json"
+//       },
+//       body: JSON.stringify({ token })
+//     });
+//     const data = await res.json();
+//     if (res.ok) {
+//       localStorage.setItem("user", JSON.stringify(data.user));
+//       navigate("/chat");
+//     } else {
+//       alert(data.error || "Google login failed");
+//     }
+//   } catch (err) {
+//     console.error("Google login error:", err);
+//     alert("Server error");
+//   }
+// };
 
 
   const handleLogin = async () => {
