@@ -75,10 +75,10 @@ function Signup() {
         type="button"
         className="auth-google-btn"
         onClick={() => { 
-          window.location.href = "https://sigmagpt-fgqc.onrender.com/api/auth/google";
+          window.location.href = "https://sigmagpt-fgqc.onrender.com/api/auth/google/callback";
         }}
       >
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo" /> Continue with Google
+        <img src="https://www.google.com/imgres?q=google%20sign%20in%20logo&imgurl=https%3A%2F%2Fmedia.wired.com%2Fphotos%2F5926ffe47034dc5f91bed4e8%2Fmaster%2Fpass%2Fgoogle-logo.jpg&imgrefurl=https%3A%2F%2Fwww.wired.com%2F2015%2F09%2Fgoogles-new-logo-trying-really-hard-look-friendly%2F&docid=xcfO8huj4InxHM&tbnid=yjNF1YrjSqFOpM&vet=12ahUKEwj33qWiq9WQAxWET2wGHS7LDwoQM3oECCIQAA..i&w=1604&h=802&hcb=2&ved=2ahUKEwj33qWiq9WQAxWET2wGHS7LDwoQM3oECCIQAA" alt="Google Logo" /> Continue with Google
       </button>
 
         <input
