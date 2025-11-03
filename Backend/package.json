@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@react-oauth/google": "^0.12.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
