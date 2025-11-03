@@ -1,8 +1,7 @@
 import "./Signup.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-// import { GoogleLogin } from "@react-oauth/google";
-import {jwtDecode} from "jwt-decode";
+import { GoogleLogin } from "@react-oauth/google";
 import AuthNavbar from "./AuthNavbar.jsx";
 
 function Signup() {
@@ -43,7 +42,7 @@ function Signup() {
     <div className="auth-bg">
       <div className="auth-card">
         <h2>Sign Up</h2>
-        {/* <GoogleLogin
+        <GoogleLogin
           onSuccess={async (credentialResponse) => {
             const token = credentialResponse.credential;
 
@@ -70,7 +69,7 @@ function Signup() {
             }
           }}
           onError={() => console.log("Google login failed")}
-        ></GoogleLogin> */}
+        ></GoogleLogin>
         <button
         type="button"
         className="auth-google-btn"
