@@ -28,9 +28,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
       maxAge: 25 * 60 * 60 * 1000,
-      domain: ".sigmagpt.com",
       secure: true, // ✅ set to true only in production with HTTPS
-      sameSite: "none"
+      sameSite: "none",
   }
 }));
 
