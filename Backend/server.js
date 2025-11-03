@@ -43,6 +43,11 @@ app.use((req, res, next) => {
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.get("/api/test-session", (req, res) => {
+  res.json({ user: req.user || null });
+});
+
 app.use("/api/auth", authRoutes); // ✅ this enables /api/auth/google
 app.use("/api", chatRoutes);
 
