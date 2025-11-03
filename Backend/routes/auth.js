@@ -9,38 +9,38 @@ const router = express.Router();
 // Start Google Auth
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-router.post("/google", async (req, res) => {
-  const { token } = req.body;
-  if (!token) return res.status(400).json({ error: "Missing token" });
+// router.post("/google", async (req, res) => {
+//   const { token } = req.body;
+//   if (!token) return res.status(400).json({ error: "Missing token" });
 
-  try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+//   try {
+//     const ticket = await client.verifyIdToken({
+//       idToken: token,
+//       audience: process.env.GOOGLE_CLIENT_ID,
+//     });
 
-    const payload = ticket.getPayload();
-    const { email, name } = payload;
+//     const payload = ticket.getPayload();
+//     const { email, name } = payload;
 
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = new User({
-        name,
-        email,
-        authProvider,
-      });
-      await user.save();
-    }
+//     let user = await User.findOne({ email });
+//     if (!user) {
+//       user = new User({
+//         name,
+//         email,
+//         authProvider,
+//       });
+//       await user.save();
+//     }
 
-    req.login(user, err => {
-      if (err) return res.status(500).json({ error: "Login failed" });
-      res.json({ success: "Logged in with Google", user });
-    });
-  } catch (err) {
-    console.error("❌ Google login error:", err);
-    res.status(401).json({ error: "Invalid token" });
-  }
-});
+//     req.login(user, err => {
+//       if (err) return res.status(500).json({ error: "Login failed" });
+//       res.json({ success: "Logged in with Google", user });
+//     });
+//   } catch (err) {
+//     console.error("❌ Google login error:", err);
+//     res.status(401).json({ error: "Invalid token" });
+//   }
+// });
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: 'https://sigma-gpt.vercel.app/login' }),
