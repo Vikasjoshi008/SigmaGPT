@@ -2,7 +2,8 @@ import express from "express";
 import bcrypt from "bcryptjs";
 // import passport from "passport";
 import User from "../models/User.js";
-const jwt=require("jsonwebtoken");
+// const jwt=require("jsonwebtoken");
+import { jwt} from "google-auth-library";
 
 const router = express.Router();
 
