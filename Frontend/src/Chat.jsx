@@ -82,7 +82,7 @@ function Chat() {
                 }
 
                 {
-                    prevChats.length > 0 && (
+                    prevChats?.length > 0 && (
                         <>
                             {
                                 latestReply === null ? (
@@ -94,11 +94,7 @@ function Chat() {
                                         <ReactMarkdown rehypePlugins={rehypeHighlight}>{latestReply}</ReactMarkdown>
                                     </div>
                                 )
-                            }   
-                            {
-                            latestReply !== null && latestReply.length < reply.length && (
-                                <div className="typing-indicator">Typing...</div>
-                                )}
+                            } 
                         </>
                     )
                 }

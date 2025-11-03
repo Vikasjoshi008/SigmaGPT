@@ -66,9 +66,14 @@ function Sidebar() {
       );
       const res = await response.json();
       console.log(res);
-      setPrevChats(res);
-      setNewChat(false);
-      setReply(null);
+      if (!Array.isArray(res)) {
+        console.error("❌ Invalid thread messages:", res);
+        setPrevChats([]);
+      } else {
+        setPrevChats(res);
+        setNewChat(false);
+        setReply(null);
+      }
     } catch (err) {
       console.log(err);
     }
