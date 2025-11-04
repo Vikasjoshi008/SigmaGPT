@@ -11,46 +11,27 @@ import authRoutes from "./routes/auth.js"
 const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(express.json());
-// app.use(cookieParser());
 
 app.use(cors({
-  origin: ["https://sigma-gpt-livid.vercel.app" , "http://localhost:5173"],
+  origin: "http://localhost:5173",
   credentials: true,
 }));
-
-// app.set("trust proxy", 1);
-// app.use(session({
-//   name: "connect.sid",
-//   secret: process.env.my_session_secret,
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: {
-//       httpOnly: true,
-//       maxAge: 25 * 60 * 60 * 1000,
-//       secure: true, // ✅ set to true only in production with HTTPS
-//       sameSite: "none",
-//   }
-// }));
 
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   next();
 });
 
-
-// app.use(passport.initialize());
-// app.use(passport.session());
-
-app.get("/api/test-session", (req, res) => {
-  res.json({ user: req.user || null });
-});
-
-app.use("/api/auth", authRoutes); // ✅ this enables /api/auth/google
+app.use("/api/auth", authRoutes);
 app.use("/api", chatRoutes);
 
 app.listen(PORT, () => {
   console.log("server is runnig on port",PORT);
   connectDB();
+});
+
+app.get("/", (req, res)=> {
+  res.send("This is root");
 });
 
 const connectDB = async() => {

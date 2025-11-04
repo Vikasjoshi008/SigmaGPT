@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Link } from "react-router-dom";
 
-function Sidebar() {
+function Sidebar({user}) {
   const {
     sidebarOpen,
     setSidebarOpen,
@@ -17,14 +17,26 @@ function Sidebar() {
     setCurrThreadId,
     setPrevChats,
   } = useContext(MyContext);
+
+  
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      getAllThreads();
+    }
+  }, [currThreadId]);
   
   if (!sidebarOpen) return null; // ✅ hide sidebar when collapsed
 
 
   const getAllThreads = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
     try {
       const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/history", {
-        credentials: "include", // include cookies for auth
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
       const res = await response.json();
       if (!Array.isArray(res)) {
@@ -43,11 +55,6 @@ function Sidebar() {
     }
   };
 
-  useEffect(() => {
-    getAllThreads();
-  }, [currThreadId]);
-
-
   const createNewChat = () => {
     setNewChat(true);
     setPrompt("");
@@ -58,11 +65,17 @@ function Sidebar() {
 
   const changeThread = async (newThreadId) => {
     setCurrThreadId(newThreadId);
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
     try {
       const response = await fetch(
         `https://sigmagpt-fgqc.onrender.com/api/thread/${newThreadId}`,
-        {credentials: "include"}
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        }
       );
       const res = await response.json();
       console.log(res);
@@ -80,10 +93,17 @@ function Sidebar() {
   };
 
   const deleteThread = async(threadId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
     try {
       const response = await fetch(
         `https://sigmagpt-fgqc.onrender.com/api/thread/${threadId}`, 
-        {method: "DELETE", credentials: "include"}, 
+        {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        }, 
       );
       const res=await response.json();
       console.log(res);
@@ -116,7 +136,9 @@ function Sidebar() {
 
       {/* history */}
       <ul className="history">
-        {allThreads?.length === 0 ? (
+        {!user ? (
+          <li className="no-history-msg"><h3><a href="/signup">signp</a> to use SigmaGPT</h3></li>
+        ) : allThreads?.length === 0 ? (
           <li className="no-history-msg"><h3>No history available.</h3></li>
         ) : (
           allThreads.map((thread, idx) => (

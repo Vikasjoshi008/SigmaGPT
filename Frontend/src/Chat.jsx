@@ -27,7 +27,7 @@ function Chat() {
 
      useEffect(() => {
         scrollToBottom();
-    }, [prevChats, latestReply, setShouldAutoScroll]);
+    }, [prevChats, latestReply]);
 
     useEffect(() => {
         if(reply === null) {
@@ -55,6 +55,7 @@ function Chat() {
 
     useEffect(() => {
         const el = chatsContainerRef.current;
+        if (!el) return;
         const handleScroll = () => {
           const bottom = el.scrollHeight - el.scrollTop === el.clientHeight;
           setShouldAutoScroll(bottom);
@@ -67,7 +68,11 @@ function Chat() {
 
     return ( 
         <>
-            {newChat && <h1 className="multiColorName">Hi <b> {user?.name}</b>, How can i help you</h1>}
+            {newChat && (
+                <h1 className="multiColorName">
+                    {user ? <>Hi <b>{user.name}</b>, How can I help you</> : <><a href="/signup" style={{textDecoration: "none"}}>Signup</a> to use SigmaGPT</>}
+                </h1>
+                )}
             <div className="chats" ref={chatsContainerRef}>
                 {
                     prevChats?.slice(0, -1).map((chat, idx) => 

@@ -2,20 +2,15 @@ import express from 'express';
 import Thread from '../models/Thread.js'
 import  getGeminiAIAPIResponse from "../utils/geminiai.js"
 import {requireAuth} from './requireAuth.js'
+import mongoose from 'mongoose';
+import { Types } from "mongoose";
 
 const router=express.Router();
 
-function requireLogin(req, res, next) {
-    if (!req.user) {
-        console.log("❌ No user in session");
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
-    next();
-}
-
-router.get("/user", requireLogin, requireAuth, async (req, res) => {
+router.get("/user", requireAuth, async (req, res) => {
     try {
-        const threads = await Thread.find({ user: req.user._id });
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const threads = await Thread.find({ user: userId });
         res.json(threads);
     } catch (err) {
         console.error("❌ Failed to fetch user threads:", err);
@@ -40,7 +35,7 @@ router.post("/test", async(req, res) => {
 });
 
 //get all threads
-router.get("/thread", requireLogin, requireAuth, async(req, res) => {
+router.get("/thread", requireAuth, async(req, res) => {
     try {
         const threads=await Thread.find({}).sort({updatedAt: -1});
         res.json(threads);
@@ -51,9 +46,10 @@ router.get("/thread", requireLogin, requireAuth, async(req, res) => {
 });
 
 // get all threads for the logged-in user
-router.get("/history", requireLogin, requireAuth, async(req, res) => {
+router.get("/history", requireAuth, async(req, res) => {
     try {
-        const threads = await Thread.find({ user: req.user._id }).sort({updatedAt: -1});
+        const userId= new mongoose.Types.ObjectId(req.user.id);
+        const threads = await Thread.find({ user: userId }).sort({updatedAt: -1});
         res.json(threads);
     } catch (err) {
         res.status(500).json({error: "Failed to fetch"});
@@ -61,10 +57,11 @@ router.get("/history", requireLogin, requireAuth, async(req, res) => {
 });
 
 // update get thread by id for user
-router.get("/thread/:threadId", requireLogin, requireAuth,async(req, res) => {
+router.get("/thread/:threadId", requireAuth,async(req, res) => {
     const {threadId} = req.params;
     try {
-        const thread=await Thread.findOne({threadId, user: req.user._id});
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const thread=await Thread.findOne({threadId, user: userId});
         if(!thread){
             return res.status(404).json({error: "thread not found"})
         }
@@ -75,10 +72,11 @@ router.get("/thread/:threadId", requireLogin, requireAuth,async(req, res) => {
 });
 
 // update delete thread for user
-router.delete("/thread/:threadId", requireLogin, requireAuth, async(req, res) => {
+router.delete("/thread/:threadId", requireAuth, async(req, res) => {
   try {
     const threadId = req.params.threadId?.trim();
-    const deletedThread = await Thread.findOneAndDelete({ threadId, user: req.user._id });
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    const deletedThread = await Thread.findOneAndDelete({ threadId, user: userId });
     if (!deletedThread) {
       return res.status(404).json({ error: "Thread not found" });
     }
@@ -90,7 +88,7 @@ router.delete("/thread/:threadId", requireLogin, requireAuth, async(req, res) =>
 ////////chat user history
 
 // updated chat route to associate threads with users
-router.post("/chat", requireLogin, requireAuth, async(req, res) => {
+router.post("/chat", requireAuth, async(req, res) => {
     console.log("🔍 req.user:", req.user); // <--- Add this
     const {threadId, message} = req.body;
 
@@ -98,11 +96,12 @@ router.post("/chat", requireLogin, requireAuth, async(req, res) => {
         return res.status(400).json({error: "missing required fields"});
     }
     try {
-        let thread = await Thread.findOne({ threadId, user: req.user._id });
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        let thread = await Thread.findOne({ threadId, user: userId });
         if (!thread) {
             thread = new Thread({
                 threadId,
-                user: req.user._id,
+                user: new mongoose.Types.ObjectId(req.user.id),
                 title: message,
                 messages: [{ role: "user", content: message }],
             });

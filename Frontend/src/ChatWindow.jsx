@@ -6,7 +6,7 @@ import {ScaleLoader} from "react-spinners";
 import { useNavigate } from "react-router-dom";
 
 
-function ChatWindow() {
+function ChatWindow({user}) {
     const {
           prompt, 
           setPrompt, 
@@ -25,13 +25,6 @@ function ChatWindow() {
 
     const token = localStorage.getItem("token");
 
-    let user = null;
-    try {
-      user = JSON.parse(localStorage.getItem("user"));
-    } catch (err) {
-      console.error("❌ Failed to parse user:", err);
-    }
-    
 
     const getReply = async() => {
     setLoading(true);
@@ -39,7 +32,6 @@ function ChatWindow() {
     console.log("message", prompt, "threadId", currThreadId);
         const options= {
             method: "post",
-            // credentials: "include", // <-- Ensure session/cookies go with request
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
@@ -131,12 +123,25 @@ useEffect(() => {
         </div>
       </div>
       {
-        isopen && 
+        isopen &&
         <div className="dropDown">
+          {user ? (
+            <>
           <p>{user.email}</p>
           <div className="dropDownItem"><i className="fa-solid fa-gear"></i> Settings</div>
           <div className="dropDownItem"><i className="fa-solid fa-cloud-arrow-up"></i> Upgrade Plan</div>
           <div className="dropDownItem" onClick={handleLogout}><i className="fa-solid fa-arrow-right-from-bracket"></i> Log out</div>
+            </>
+          ) : (
+            <>
+            <div className="dropDownItem" onClick={() => navigate("/signup")}>
+              <i className="fa-solid fa-user-plus"></i> Sign up
+            </div>
+            <div className="dropDownItem" onClick={() => navigate("/login")}>
+              <i className="fa-solid fa-right-to-bracket"></i> Log in
+            </div>
+          </>
+        )}
         </div>
       }
       <Chat></Chat>
@@ -148,10 +153,22 @@ useEffect(() => {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && prompt.trim()) getReply();
+            if (e.key === "Enter" && prompt.trim()) {
+              if(!user) {
+                alert("Signup or login to chat with SigmaGPT");
+                return;
+              }
+              getReply();
+            }
           }}
           />
-          <div id="submit" onClick={() => prompt.trim() && getReply()}>
+          <div id="submit" onClick={() => {
+            if(!user) {
+              alert("Sign up or login to chat with SigmaGPT");
+              return;
+            }
+            if (prompt.trim()) getReply()
+            }}>
             <i className="fa-solid fa-paper-plane"></i>
           </div>
         </div>

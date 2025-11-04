@@ -1,7 +1,6 @@
 import "./Signup.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import AuthNavbar from "./AuthNavbar.jsx";
 
 function Signup() {
@@ -14,13 +13,6 @@ function Signup() {
 
   const handleSignup = async () => {
     try {
-      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/signup", {
-        method: "POST",
-        // credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
-      });
-      const data = await res.json();
        if (!name || !email || !password) {
         alert("All fields are required");
         return;
@@ -29,11 +21,22 @@ function Signup() {
         alert("Password must be at least 6 characters");
         return;
       }      
-
-      if (res.ok && data.user && data.token) {
+      setLoading(true);
+      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/signup", {
+        method: "POST",
+        // credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.token && data.user) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/chat");
+        window.dispatchEvent(new Event("storage"));
+        navigate("/chat"); // ✅ ensures token is saved
+        window.location.reload(); 
+        // window.dispatchEvent(new Event("storage")); // ✅ triggers App.jsx to update
       } else {
         alert(data.error || "Signup failed");
       }
@@ -49,36 +52,6 @@ function Signup() {
     <div className="auth-bg">
       <div className="auth-card">
         <h2>Sign Up</h2>
-        <GoogleLogin
-          onSuccess={async (credentialResponse) => {
-            const token = credentialResponse.credential;
-
-            try {
-              const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/google", {
-                method: "POST",
-                // credentials: "include", // ✅ important for session cookies
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ token })
-              });
-
-              const data = await res.json();
-              if (res.ok && data.user && data.token) {
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("user", JSON.stringify(data.user));
-                navigate("/chat");
-              } else {
-                alert(data.error || "Google login failed");
-              }
-            } catch (err) {
-              console.error("Google login error:", err);
-              alert("Server error");
-            }
-          }}
-          onError={() => console.log("Google login failed")}
-        ></GoogleLogin>
-
         <input
           type="text"
           placeholder="Name"

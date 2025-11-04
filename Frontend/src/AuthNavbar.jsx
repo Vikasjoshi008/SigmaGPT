@@ -9,9 +9,9 @@ function AuthNavbar() {
       <div className="logo">SigmaGPT</div>
       <div className="navAction">
         {isLoginPage ? (
-          <Link to="/" className="navBtn">Log in to use SigmaGPT</Link>
+          <Link to="/signup" className="navBtn">login</Link>
         ) : (
-          <Link to="/login" className="navBtn">Sign up to use SigmaGPT</Link>
+          <Link to="/login" className="navBtn">signup</Link>
         )}
       </div>
     </nav>

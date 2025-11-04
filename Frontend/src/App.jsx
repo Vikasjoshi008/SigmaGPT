@@ -26,21 +26,20 @@ function App() {
     allThreads, setAllThreads,
     sidebarOpen, setSidebarOpen
   };
+  const [user, setUser]=useState(null)
 
-  useEffect(() => {
-    fetch("https://sigmagpt-fgqc.onrender.com/api/test-session", {
-      credentials: "include"
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        } else {
-          localStorage.removeItem("user");
-        }
-      });
-  }, []);
-  const user = JSON.parse(localStorage.getItem("user") || "null");
+ useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  setUser(storedUser ? JSON.parse(storedUser) : null);
+
+  const handleStorageChange = () => {
+    const updatedUser = localStorage.getItem("user");
+    setUser(updatedUser ? JSON.parse(updatedUser) : null);
+  };
+
+  window.addEventListener("storage", handleStorageChange);
+  return () => window.removeEventListener("storage", handleStorageChange);
+}, []);
 
 
   return (
@@ -48,9 +47,10 @@ function App() {
       <MyContext.Provider value={providerValues}>
         <Router>
           <Routes>
-            <Route path="/" element={<Signup />} />
+            <Route path="/" element={<Navigate to="/chat" />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/chat" element={
+            {/* <Route path="/chat" element={
               user ? (
                 <>
                   <Sidebar />
@@ -59,6 +59,12 @@ function App() {
               ) : (
                 <Navigate to="/login" />
               )
+            } /> */}
+            <Route path="/chat" element={
+              <>
+                {user ? <Sidebar user={user} /> : <Sidebar user={null} />}
+                <ChatWindow user={user} />
+              </>
             } />
           </Routes>
         </Router>
