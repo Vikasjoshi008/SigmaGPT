@@ -17,6 +17,17 @@ function generateToken(user) {
   );
 }
 
+if (!admin.apps.length) {
+  try {
+    // Step 1: decode the Base64 JSON from Render
+    const jsonString = Buffer.from(
+      process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+      "base64"
+    ).toString("utf8");
+
+    const serviceAccount = JSON.parse(jsonString);
+
+
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -24,7 +35,11 @@ admin.initializeApp({
     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
   })
 });
-
+    console.log("✅ Firebase Admin initialized successfully");
+ } catch (err) {
+    console.error("🔥 Firebase Admin initialization failed:", err);
+  }
+}
 // routes/auth.js
 // routes/auth.js
 router.post("/firebase", async (req, res) => {
