@@ -25,20 +25,24 @@ admin.initializeApp({
   })
 });
 
+// routes/auth.js
 router.post("/firebase", async (req, res) => {
   const { token } = req.body;
   console.log("Received Firebase ID Token (truncated):", token ? token.slice(0, 30) + "..." : "No token");
 
+  // 1) Verify ID token
   let decoded;
   try {
-    decoded = await admin.auth().verifyIdToken(token); // this part is fine
+    decoded = await admin.auth().verifyIdToken(token);
   } catch (err) {
     console.error("❌ Firebase token verification failed:", err.code, err.message);
     return res.status(401).json({ error: "Invalid Firebase token", details: err.message });
   }
 
+  // 2) Resolve identity fields
   try {
-      let { email, name, uid } = decoded;
+    let { uid, email, name } = decoded;
+
     if (!email || !name) {
       const record = await admin.auth().getUser(uid);
       email = email || record.email || (record.providerData.find(p => p.email)?.email);
@@ -46,25 +50,44 @@ router.post("/firebase", async (req, res) => {
     }
 
     if (!email) {
-      // still no email — bail out explicitly
+      // Extremely rare for Google; if you hit this, you can allow phone-only users here.
       return res.status(400).json({ error: "Email missing from Firebase account." });
     }
-    // Use a provider value your schema allows
-    const provider = "google"; // or "firebase" if your enum includes it
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = new User({ name, email, authProvider: provider });
-      await user.save();
-    }
 
+    email = email.toLowerCase().trim();
+    const provider = "google"; // align with your schema enum
+
+    // 3) Upsert user atomically
+    const update = {
+      $setOnInsert: { authProvider: provider },
+      $set: { name } // keep latest display name
+    };
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      update,
+      { new: true, upsert: true, runValidators: true, context: "query" }
+    );
+
+    // 4) Issue app JWT
     const jwtToken = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     return res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
+
   } catch (err) {
-    // IMPORTANT: Don't call this a "token" error; surface the real Mongoose validation details
+    // Surface exact Mongoose errors
+    if (err?.code === 11000) {
+      console.error("❌ Duplicate email (E11000):", err.keyValue);
+      return res.status(409).json({ error: "Account already exists for this email." });
+    }
     console.error("❌ User creation/login failed:", err);
-    return res.status(400).json({ error: "User creation failed", details: err.message });
+    return res.status(400).json({
+      error: "User creation failed",
+      details: err.message,
+      fields: err.errors ? Object.fromEntries(Object.entries(err.errors).map(([k,v]) => [k, v.message])) : undefined
+    });
   }
 });
+
 
 
   router.post("/signup", async (req, res) => {
