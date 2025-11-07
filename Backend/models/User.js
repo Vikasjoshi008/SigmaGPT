@@ -13,12 +13,12 @@ const UserSchema = new mongoose.Schema({
   password: { 
     type: String, 
     required: function () {
-      return this.authProvider !== "google";
+      return this.authProvider === "local";
     },
   },
     authProvider: {
     type: String,
-    enum: ["local", "google"],
+    enum: ["local", "firebase"],
     default: "local"
   },
 }, {timestamps: true});

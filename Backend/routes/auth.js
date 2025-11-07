@@ -25,31 +25,46 @@ admin.initializeApp({
   })
 });
 
-console.log("Firebase Admin SDK Initialized with:");
-console.log("  Project ID:", process.env.FIREBASE_PROJECT_ID);
-console.log("  Client Email:", process.env.FIREBASE_CLIENT_EMAIL);
-console.log("  Private Key (truncated):", process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.substring(0, 30) + "..." : "Not set");
-
 router.post("/firebase", async (req, res) => {
   const { token } = req.body;
-  console.log("Received Firebase ID Token on backend (truncated):", token ? token.substring(0, 30) + "..." : "No token");
+  console.log("Received Firebase ID Token (truncated):", token ? token.slice(0, 30) + "..." : "No token");
+
+  let decoded;
   try {
-    const decoded = await admin.auth().verifyIdToken(token);
-    const { email, name } = decoded;
+    decoded = await admin.auth().verifyIdToken(token); // this part is fine
+  } catch (err) {
+    console.error("❌ Firebase token verification failed:", err.code, err.message);
+    return res.status(401).json({ error: "Invalid Firebase token", details: err.message });
+  }
+
+  try {
+    const email = decoded.email;
+    if (!email) {
+      // Extremely rare for Google, but be safe
+      return res.status(400).json({ error: "Email missing from Firebase token." });
+    }
+
+    // Name may be absent in token; fallback to local-part of email
+    const name = decoded.name || (email.includes("@") ? email.split("@")[0] : "User");
+
+    // Use a provider value your schema allows
+    const provider = "google"; // or "firebase" if your enum includes it
 
     let user = await User.findOne({ email });
     if (!user) {
-      user = new User({ name, email, authProvider: "firebase" });
+      user = new User({ name, email, authProvider: provider });
       await user.save();
     }
 
     const jwtToken = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
+    return res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
   } catch (err) {
-    console.error("❌ Firebase token verification failed:", err);
-    res.status(401).json({ error: "Invalid Firebase token" });
+    // IMPORTANT: Don't call this a "token" error; surface the real Mongoose validation details
+    console.error("❌ User creation/login failed:", err);
+    return res.status(400).json({ error: "User creation failed", details: err.message });
   }
 });
+
 
   router.post("/signup", async (req, res) => {
     const { name, email, password } = req.body;
