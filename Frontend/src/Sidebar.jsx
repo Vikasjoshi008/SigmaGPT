@@ -150,7 +150,7 @@ function Sidebar({user}) {
               <i className="fa-solid fa-trash"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!window.confirm("Are you sure you want to delete this thread?")) return;
+                  if (!window.confirm("Are you sure you want to delete this chat?")) return;
                   deleteThread(thread.threadId);
                 }}
               ></i>

@@ -74,7 +74,7 @@ function ChatWindow({user}) {
       setIsOpen(!isopen);
     }
 
-    const handleLogout = async () => {
+  const handleLogout = async () => {
   try {
     const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/logout", {
       method: "POST",

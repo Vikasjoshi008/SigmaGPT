@@ -46,7 +46,7 @@ router.post("/firebase", async (req, res) => {
   const { token } = req.body;
   console.log("Received Firebase ID Token (truncated):", token ? token.slice(0, 30) + "..." : "No token");
 
-  // 1) Verify token
+  // A) Verify the token
   let decoded;
   try {
     decoded = await admin.auth().verifyIdToken(token);
@@ -55,7 +55,7 @@ router.post("/firebase", async (req, res) => {
     return res.status(401).json({ error: "Invalid Firebase token", details: err.message });
   }
 
-  // 2) Resolve identity
+  // B) Resolve identity (with fallback)
   try {
     let { uid, email, name } = decoded;
 
@@ -69,34 +69,36 @@ router.post("/firebase", async (req, res) => {
       return res.status(400).json({ error: "Email missing from Firebase account." });
     }
 
-    email = email.toLowerCase().trim();
-    // Use value allowed by your schema
-    const provider = "google"; // or "firebase" if you prefer
+    // normalize
+    email = String(email).toLowerCase().trim();
+    const provider = "google"; // <-- make sure your schema allows this value
 
-    // 3) Upsert user
+    // C) Upsert (atomic) — avoid race/duplicate errors
     const user = await User.findOneAndUpdate(
       { email },
-      { $setOnInsert: { authProvider: provider }, $set: { name } },
-      { new: true, upsert: true, runValidators: true, context: "query" }
+      { 
+        $setOnInsert: { authProvider: provider },
+        $set: { name } 
+      },
+      { new: true, upsert: true, runValidators: true, context: "query", collation: { locale: "en", strength: 2 } }
     );
 
-    // 4) App JWT
+    // D) Issue your app JWT
     const jwtToken = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     return res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
 
   } catch (err) {
     if (err?.code === 11000) {
-      console.error("❌ Duplicate email (E11000):", err.keyValue);
-      return res.status(409).json({ error: "Account already exists for this email." });
+      // email already exists (likely a local account for same email)
+      return res.status(409).json({ error: "Account already exists for this email. Try password login or link accounts." });
     }
+    // surface mongoose details so you can see what's wrong
+    const fields = err?.errors ? Object.fromEntries(Object.entries(err.errors).map(([k,v]) => [k, v.message])) : undefined;
     console.error("❌ User creation/login failed:", err);
-    return res.status(400).json({
-      error: "User creation failed",
-      details: err.message,
-      fields: err.errors ? Object.fromEntries(Object.entries(err.errors).map(([k,v]) => [k, v.message])) : undefined
-    });
+    return res.status(400).json({ error: "User creation failed", details: err.message, fields });
   }
 });
+
 
 
 router.post("/signup", async (req, res) => {
@@ -118,10 +120,8 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
-    // Check if user exists (case-insensitive)
     const existing = await User.findOne({ email }).collation({ locale: "en", strength: 2 });
     if (existing) {
-      // If it’s a Google-only account, guide the user
       if (existing.authProvider && existing.authProvider !== "local") {
         return res.status(400).json({ error: "This email is already registered with Google. Use 'Continue with Google'." });
       }
@@ -134,17 +134,15 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password: hashed,
-      authProvider: "local", // important for schemas where password is required only for local
+      authProvider: "local", 
     });
 
     await user.save();
 
-    // Issue JWT
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     return res.json({ token, user: { name: user.name, email: user.email } });
 
   } catch (err) {
-    // Handle duplicate key & surface helpful info
     if (err?.code === 11000) {
       return res.status(409).json({ error: "Account already exists for this email." });
     }
@@ -160,24 +158,15 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
-
     email = String(email).toLowerCase().trim();
-
-    // If your schema has `select: false` on password, you MUST add +password here.
-    // If not, leaving +password will still work.
     const user = await User.findOne({ email }).select("+password");
-
     if (!user) {
-      // don’t leak which field is wrong
       return res.status(401).json({ error: "Invalid credentials" });
     }
-
-    // If the account was created via Google (no password), block password login
     if (user.authProvider && user.authProvider !== "local") {
       return res.status(400).json({ error: "This account uses Google login. Use 'Continue with Google'." });
     }
-
-    const hash = user.password || ""; // defensive
+    const hash = user.password || ""; 
     const isMatch = await bcrypt.compare(String(password), String(hash));
 
     if (!isMatch) {
