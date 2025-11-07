@@ -105,7 +105,10 @@ function Login() {
         <button className="auth-btn" disabled={loading} onClick={handleLogin}>
           {loading ? "Logging in..." : "Login"}
         </button>
-
+        <button className="googleBtn" onClick={handleGoogleLogin}>
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" style={{ width: "20px", marginRight: "8px" }} />
+          Continue with Google
+        </button>
         <div className="switch-link">
           Don't have an account? <Link to="/signup">Sign up</Link>
         </div>
