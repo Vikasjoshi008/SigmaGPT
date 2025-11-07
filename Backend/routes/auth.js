@@ -25,6 +25,26 @@ admin.initializeApp({
   })
 });
 
+router.post("/firebase", async (req, res) => {
+  const { token } = req.body;
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    const { email, name } = decoded;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({ name, email, authProvider: "firebase" });
+      await user.save();
+    }
+
+    const jwtToken = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
+  } catch (err) {
+    console.error("❌ Firebase token verification failed:", err);
+    res.status(401).json({ error: "Invalid Firebase token" });
+  }
+});
+
   router.post("/signup", async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
