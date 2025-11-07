@@ -3,7 +3,8 @@ import mongoose, { mongo } from "mongoose";
 const UserSchema = new mongoose.Schema({
   name: { 
     type: String, 
-    required: true 
+    required: true,
+    trim: true
   },
   email: {
     type: String,
@@ -17,12 +18,14 @@ const UserSchema = new mongoose.Schema({
     required: function () {
       return this.authProvider === "local";
     },
+    select: false,
   },
     authProvider: {
     type: String,
-    enum: ["local", "firebase"],
+    enum: ["local", "google", "firebase"],
     default: "local"
   },
 }, {timestamps: true});
 
+UserSchema.index({ email: 1 }, { unique: true, collation: { locale: "en", strength: 2 } });
 export default mongoose.model("User", UserSchema);
