@@ -48,7 +48,12 @@ function Login() {
    const handleGoogleLogin = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
-    const idToken = await result.user.getIdToken(); // 🔥 Firebase ID token
+    const idToken = await result.user.getIdToken(true); // 🔥 Firebase ID token
+
+    if (!idToken) {
+      alert("Failed to retrieve Firebase token");
+      return;
+    }
 
     const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/firebase", {
       method: "POST",
