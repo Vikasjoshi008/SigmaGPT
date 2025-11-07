@@ -51,30 +51,39 @@ function Signup() {
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken(true); // 🔥 Firebase ID token
-  
-      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/firebase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: idToken })
-      });
-  
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.token); // your JWT
-        localStorage.setItem("user", JSON.stringify(data.user));
-        window.dispatchEvent(new Event("storage"));
-        navigate("/chat");
-      } else {
-        alert(data.error || "Login failed");
-      }
-    } catch (err) {
-      console.error("Google login error:", err);
-      alert("Google login failed");
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const idToken = await result.user.getIdToken(true); // 🔥 Firebase ID token
+
+    if (!idToken) {
+      alert("Failed to retrieve Firebase token");
+      return;
     }
-  };
+    // Verify token length and format before sending
+    console.log("Firebase ID Token retrieved (length):", idToken.length);
+    console.log("Firebase ID Token prefix check:", idToken.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
+
+    const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/firebase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: idToken }),
+      credentials: "include" // Add this for mobile cross-origin credential handling
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem("token", data.token); // your JWT
+      localStorage.setItem("user", JSON.stringify(data.user));
+      window.dispatchEvent(new Event("storage"));
+      navigate("/chat");
+    } else {
+      alert(data.error || "Login failed");
+    }
+  } catch (err) {
+    console.error("Google login error (detailed):", err.name, err.message, err.code);
+    alert(`Google login failed: ${err.message}`);
+  }
+};
 
   return (
     <>
