@@ -1,8 +1,11 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
-import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
+import admin from "firebase-admin";
+import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
 
 const router = express.Router();
 
@@ -13,6 +16,14 @@ function generateToken(user) {
     { expiresIn: "7d" }
   );
 }
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+  })
+});
 
   router.post("/signup", async (req, res) => {
     const { name, email, password } = req.body;

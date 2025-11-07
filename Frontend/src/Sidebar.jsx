@@ -17,14 +17,6 @@ function Sidebar({user}) {
     setCurrThreadId,
     setPrevChats,
   } = useContext(MyContext);
-
-  
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      getAllThreads();
-    }
-  }, [currThreadId]);
   
   if (!sidebarOpen) return null; // ✅ hide sidebar when collapsed
 
@@ -55,12 +47,21 @@ function Sidebar({user}) {
     }
   };
 
+    useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      getAllThreads();
+    }
+  }, [currThreadId]);
+
   const createNewChat = () => {
     setNewChat(true);
     setPrompt("");
     setReply(null);
     setCurrThreadId(uuidv4());
     setPrevChats([]);
+    setSidebarOpen(false);
+
   };
 
   const changeThread = async (newThreadId) => {

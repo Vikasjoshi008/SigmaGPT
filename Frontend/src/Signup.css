@@ -110,3 +110,26 @@
     font-size: 0.9rem;
   }
 }
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .auth-input {
+  width: 100%;
+  padding-right: 12px; /* space for icon */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: black;
+}
+
+.eye-icon > i {
+  color: gray;
+}
+

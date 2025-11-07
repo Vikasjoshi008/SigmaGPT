@@ -83,22 +83,41 @@
         margin-left: 4px;
     }
 
-    .auth-google-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff;
-        color: #444;
-        border: 1px solid #bbb;
-        border-radius: 0.7rem;
-        font-size: 1.13rem;
-        font-weight: 500;
-        cursor: pointer;
-        padding: 0.7rem 0;
-        margin-bottom: 0.7rem;
-        margin-top: 0.2rem;
-      }
-      .auth-google-btn:hover {
-        background: #f9f9f9;
-        border-color: #888;
-      }
+    .googleBtn {
+    display: flex;
+    align-items: center;
+    color: black;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+}
+.googleBtn:hover {
+    background-color: #f7f7f7;
+    border: 1px solid black;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .auth-input {
+  width: 100%;
+  padding-right: 12px; /* space for icon */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: black;
+}
+
+.eye-icon > i {
+  color: gray;
+}

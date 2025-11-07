@@ -50,16 +50,6 @@ function App() {
             <Route path="/" element={<Navigate to="/chat" />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
-            {/* <Route path="/chat" element={
-              user ? (
-                <>
-                  <Sidebar />
-                  <ChatWindow />
-                </>
-              ) : (
-                <Navigate to="/login" />
-              )
-            } /> */}
             <Route path="/chat" element={
               <>
                 {user ? <Sidebar user={user} /> : <Sidebar user={null} />}
