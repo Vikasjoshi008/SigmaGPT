@@ -26,11 +26,12 @@ admin.initializeApp({
 });
 
 // routes/auth.js
+// routes/auth.js
 router.post("/firebase", async (req, res) => {
   const { token } = req.body;
   console.log("Received Firebase ID Token (truncated):", token ? token.slice(0, 30) + "..." : "No token");
 
-  // 1) Verify ID token
+  // 1) Verify token
   let decoded;
   try {
     decoded = await admin.auth().verifyIdToken(token);
@@ -39,7 +40,7 @@ router.post("/firebase", async (req, res) => {
     return res.status(401).json({ error: "Invalid Firebase token", details: err.message });
   }
 
-  // 2) Resolve identity fields
+  // 2) Resolve identity
   try {
     let { uid, email, name } = decoded;
 
@@ -50,31 +51,25 @@ router.post("/firebase", async (req, res) => {
     }
 
     if (!email) {
-      // Extremely rare for Google; if you hit this, you can allow phone-only users here.
       return res.status(400).json({ error: "Email missing from Firebase account." });
     }
 
     email = email.toLowerCase().trim();
-    const provider = "google"; // align with your schema enum
+    // Use value allowed by your schema
+    const provider = "google"; // or "firebase" if you prefer
 
-    // 3) Upsert user atomically
-    const update = {
-      $setOnInsert: { authProvider: provider },
-      $set: { name } // keep latest display name
-    };
-
+    // 3) Upsert user
     const user = await User.findOneAndUpdate(
       { email },
-      update,
+      { $setOnInsert: { authProvider: provider }, $set: { name } },
       { new: true, upsert: true, runValidators: true, context: "query" }
     );
 
-    // 4) Issue app JWT
+    // 4) App JWT
     const jwtToken = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     return res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
 
   } catch (err) {
-    // Surface exact Mongoose errors
     if (err?.code === 11000) {
       console.error("❌ Duplicate email (E11000):", err.keyValue);
       return res.status(409).json({ error: "Account already exists for this email." });
@@ -87,6 +82,7 @@ router.post("/firebase", async (req, res) => {
     });
   }
 });
+
 
 
 
