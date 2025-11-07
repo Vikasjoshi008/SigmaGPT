@@ -25,8 +25,14 @@ admin.initializeApp({
   })
 });
 
+console.log("Firebase Admin SDK Initialized with:");
+console.log("  Project ID:", process.env.FIREBASE_PROJECT_ID);
+console.log("  Client Email:", process.env.FIREBASE_CLIENT_EMAIL);
+console.log("  Private Key (truncated):", process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.substring(0, 30) + "..." : "Not set");
+
 router.post("/firebase", async (req, res) => {
   const { token } = req.body;
+  console.log("Received Firebase ID Token on backend (truncated):", token ? token.substring(0, 30) + "..." : "No token");
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     const { email, name } = decoded;
