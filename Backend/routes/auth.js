@@ -99,38 +99,96 @@ router.post("/firebase", async (req, res) => {
 });
 
 
+router.post("/signup", async (req, res) => {
+  try {
+    let { name, email, password } = req.body || {};
 
-
-  router.post("/signup", async (req, res) => {
-    const { name, email, password } = req.body;
+    // Basic validation
     if (!name || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    try {
-      const existing = await User.findOne({ email });
-      if (existing) return res.status(400).json({ error: "User already exists" });
-  
-      const hashed = await bcrypt.hash(password, 10);
-      const user = new User({ name, email, password: hashed });
-      await user.save();
-  
-      const token = generateToken(user);
-      res.json({ token, user: { name: user.name, email: user.email } });
-    } catch (err) {
-      res.status(500).json({ error: "Signup failed" });
+    name = String(name).trim();
+    email = String(email).toLowerCase().trim();
+    password = String(password);
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email address" });
     }
-  });
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Check if user exists (case-insensitive)
+    const existing = await User.findOne({ email }).collation({ locale: "en", strength: 2 });
+    if (existing) {
+      // If it’s a Google-only account, guide the user
+      if (existing.authProvider && existing.authProvider !== "local") {
+        return res.status(400).json({ error: "This email is already registered with Google. Use 'Continue with Google'." });
+      }
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // Create local user
+    const hashed = await bcrypt.hash(password, 10);
+    const user = new User({
+      name,
+      email,
+      password: hashed,
+      authProvider: "local", // important for schemas where password is required only for local
+    });
+
+    await user.save();
+
+    // Issue JWT
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    return res.json({ token, user: { name: user.name, email: user.email } });
+
+  } catch (err) {
+    // Handle duplicate key & surface helpful info
+    if (err?.code === 11000) {
+      return res.status(409).json({ error: "Account already exists for this email." });
+    }
+    console.error("Signup error:", err);
+    return res.status(500).json({ error: "Signup failed" });
+  }
+});
+
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
-    const token = generateToken(user);
-    res.json({ token, user: { name: user.name, email: user.email } });
+    let { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    email = String(email).toLowerCase().trim();
+
+    // If your schema has `select: false` on password, you MUST add +password here.
+    // If not, leaving +password will still work.
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user) {
+      // don’t leak which field is wrong
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // If the account was created via Google (no password), block password login
+    if (user.authProvider && user.authProvider !== "local") {
+      return res.status(400).json({ error: "This account uses Google login. Use 'Continue with Google'." });
+    }
+
+    const hash = user.password || ""; // defensive
+    const isMatch = await bcrypt.compare(String(password), String(hash));
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    return res.json({ token, user: { name: user.name, email: user.email } });
   } catch (err) {
-    res.status(500).json({ error: "Login failed" });
+    console.error("Login error:", err);
+    return res.status(500).json({ error: "Login failed" });
   }
 });
 
