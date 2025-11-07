@@ -38,18 +38,19 @@ router.post("/firebase", async (req, res) => {
   }
 
   try {
-    const email = decoded.email;
-    if (!email) {
-      // Extremely rare for Google, but be safe
-      return res.status(400).json({ error: "Email missing from Firebase token." });
+      let { email, name, uid } = decoded;
+    if (!email || !name) {
+      const record = await admin.auth().getUser(uid);
+      email = email || record.email || (record.providerData.find(p => p.email)?.email);
+      name  = name  || record.displayName || (email ? email.split("@")[0] : "User");
     }
 
-    // Name may be absent in token; fallback to local-part of email
-    const name = decoded.name || (email.includes("@") ? email.split("@")[0] : "User");
-
+    if (!email) {
+      // still no email — bail out explicitly
+      return res.status(400).json({ error: "Email missing from Firebase account." });
+    }
     // Use a provider value your schema allows
     const provider = "google"; // or "firebase" if your enum includes it
-
     let user = await User.findOne({ email });
     if (!user) {
       user = new User({ name, email, authProvider: provider });
