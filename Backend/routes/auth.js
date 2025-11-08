@@ -30,9 +30,9 @@ if (!admin.apps.length) {
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+    projectId: serviceAccount.project_id,
+    clientEmail: serviceAccount.client_email,
+    privateKey: serviceAccount.private_key
   })
 });
     console.log("✅ Firebase Admin initialized successfully");
@@ -41,10 +41,13 @@ admin.initializeApp({
   }
 }
 // routes/auth.js
-// routes/auth.js
+// --- Google Sign-In route (auth.js) ---
 router.post("/firebase", async (req, res) => {
   const { token } = req.body;
-  console.log("Received Firebase ID Token (truncated):", token ? token.slice(0, 30) + "..." : "No token");
+  console.log(
+    "Received Firebase ID Token (truncated):",
+    token ? token.slice(0, 30) + "..." : "No token"
+  );
 
   // A) Verify the token
   let decoded;
@@ -55,49 +58,52 @@ router.post("/firebase", async (req, res) => {
     return res.status(401).json({ error: "Invalid Firebase token", details: err.message });
   }
 
-  // B) Resolve identity (with fallback)
   try {
+    // B) Resolve identity (fallback to Admin getUser)
     let { uid, email, name } = decoded;
-
     if (!email || !name) {
       const record = await admin.auth().getUser(uid);
       email = email || record.email || (record.providerData.find(p => p.email)?.email);
       name  = name  || record.displayName || (email ? email.split("@")[0] : "User");
     }
-
     if (!email) {
       return res.status(400).json({ error: "Email missing from Firebase account." });
     }
 
-    // normalize
     email = String(email).toLowerCase().trim();
-    const provider = "google"; // <-- make sure your schema allows this value
+    const provider = "google"; // ensure your schema enum allows this
 
-    // C) Upsert (atomic) — avoid race/duplicate errors
-    const user = await User.findOneAndUpdate(
-      { email },
-      { 
-        $setOnInsert: { authProvider: provider },
-        $set: { name } 
-      },
-      { new: true, upsert: true, runValidators: true, context: "query", collation: { locale: "en", strength: 2 } }
+    // C) Find or create as a DOCUMENT (no upsert)
+    let user = await User.findOne({ email }).collation({ locale: "en", strength: 2 });
+
+    if (!user) {
+      user = new User({ name, email, authProvider: provider });
+      await user.validate(); // if schema blocks, we get exact field errors here
+      await user.save();
+    } else {
+      if (name && name !== user.name) {
+        user.name = name;
+        await user.save();
+      }
+    }
+
+    // D) JWT
+    const jwtToken = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
-
-    // D) Issue your app JWT
-    const jwtToken = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
     return res.json({ token: jwtToken, user: { name: user.name, email: user.email } });
 
   } catch (err) {
-    if (err?.code === 11000) {
-      // email already exists (likely a local account for same email)
-      return res.status(409).json({ error: "Account already exists for this email. Try password login or link accounts." });
-    }
-    // surface mongoose details so you can see what's wrong
-    const fields = err?.errors ? Object.fromEntries(Object.entries(err.errors).map(([k,v]) => [k, v.message])) : undefined;
+    const fields = err?.errors
+      ? Object.fromEntries(Object.entries(err.errors).map(([k, v]) => [k, v.message]))
+      : undefined;
     console.error("❌ User creation/login failed:", err);
     return res.status(400).json({ error: "User creation failed", details: err.message, fields });
   }
 });
+
 
 
 
