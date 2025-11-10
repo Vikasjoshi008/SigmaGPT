@@ -1,4 +1,5 @@
 .chats {
+    position: relative; /* added so absolute-centered greeting positions relative to this area */
     max-width: 700px;
     overflow-y: scroll;
     padding: 8rem;
@@ -8,18 +9,57 @@
   }
 }
 
-@media (max-width: 768px) {
-    .chats {
-        padding: 4rem;
-        overflow-y: scroll;
-        -ms-overflow-style: none;
-        &::-webkit-scrollbar {
-        display: none;
-    }
+/* mobile adjustments: larger, centered, comfortable spacing */
+@media (max-width: 480px) {
+    /* reduce user message left offset so messages fit on narrow screens */
+    .userMessage {
+        margin-left: 1rem;
+        margin-right: 1rem;
+        max-width: 92%;
+        padding: 12px 16px;
+        border-radius: 14px;
     }
 
-    h1 {
-        font-size: 1.5rem;
+    /* make assistant and user messages centered for better readability */
+    .userDiv, .gptDiv {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        padding: 6px 0;
+    }
+
+    .chats {
+        padding: 2rem 1rem;
+    }
+
+    /* Ensure GPT responses take full width and wrap properly */
+    .gptDiv {
+        width: 100%;
+        display: block !important; /* override any flex settings */
+        text-align: left;
+        padding: 0.5rem;
+    }
+
+    .gptDiv p, 
+    .gptDiv pre, 
+    .gptDiv code {
+        width: 100%;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    /* Ensure markdown content wraps properly */
+    .gptDiv > * {
+        max-width: 100% !important;
+        margin: 0.5rem 0;
+    }
+
+    /* Ensure code blocks don't overflow */
+    .hljs {
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
 }
 
@@ -35,7 +75,7 @@
 }
 
 .userMessage {
-    background-color: #323232;
+    background-color: #2f2f2f;
     padding: 10px 20px;
     border-radius: 14px;
     margin-left: 15rem;

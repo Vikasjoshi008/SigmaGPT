@@ -38,7 +38,12 @@ function Chat() {
         setShouldAutoScroll(true);
         userScrolledRef.current = false;
 
-        if(!prevChats?.length) return;
+        const isEmpty = !prevChats || prevChats.length === 0; // <-- new
+
+        if(isEmpty) {
+            setLatestReply("");
+            return;
+        }
 
         const content=reply.split(" ");
 
@@ -69,10 +74,10 @@ function Chat() {
     return ( 
         <>
             {newChat && (
-                <h1 className="multiColorName">
-                    {user ? <>Hi <b>{user.name}</b>, How can I help you</> : <><a href="/signup" style={{textDecoration: "none"}}>Signup</a> to use SigmaGPT</>}
+                <h1 className={`multiColorName`}>
+                    {user ? <>Hi <b>{user.name}</b>, How can I help you?</> : <><a href="/signup" style={{textDecoration: "none"}}>Signup</a> to use SigmaGPT</>}
                 </h1>
-                )}
+            )}
             <div className="chats" ref={chatsContainerRef}>
                 {
                     prevChats?.slice(0, -1).map((chat, idx) => 

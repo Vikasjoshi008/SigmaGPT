@@ -92,16 +92,35 @@ function ChatWindow({user}) {
   }
 };
 
-useEffect(() => {
-  const input = document.querySelector(".inputBox input");
-  if (input) {
-    input.addEventListener("focus", () => {
-      setTimeout(() => {
-        input.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 300);
-    });
-  }
-}, []);
+// useEffect(() => {
+//   const input = document.querySelector(".inputBox input");
+//   if (input) {
+//     input.addEventListener("focus", () => {
+//       setTimeout(() => {
+//         input.scrollIntoView({ behavior: "smooth", block: "center" });
+//       }, 300);
+//     });
+//   }
+// }, []);
+ useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const apply = () => {
+      // height available for layout (helps iOS/Android keyboards)
+      document.documentElement.style.setProperty("--vvh", `${vv.height}px`);
+      // additional bottom offset when keyboard is visible
+      const bottomOffset = Math.max(0, (window.innerHeight - vv.height - vv.offsetTop));
+      document.documentElement.style.setProperty("--vv-bottom", `${bottomOffset}px`);
+    };
+    apply();
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+    };
+  }, []);
+
 
 
 
@@ -120,30 +139,29 @@ useEffect(() => {
           <span className="userIcon">
             {user?.name?.[0]?.toUpperCase() || "?"}
           </span>
+          {isopen && (
+            <div className="dropDown">
+              {user ? (
+                <>
+                  <p>{user.email}</p>
+                  <div className="dropDownItem"><i className="fa-solid fa-gear"></i> Settings</div>
+                  <div className="dropDownItem"><i className="fa-solid fa-cloud-arrow-up"></i> Upgrade Plan</div>
+                  <div className="dropDownItem" onClick={handleLogout}><i className="fa-solid fa-arrow-right-from-bracket"></i> Log out</div>
+                </>
+              ) : (
+                <>
+                  <div className="dropDownItem" onClick={() => navigate("/signup")}>
+                    <i className="fa-solid fa-user-plus"></i> Sign up
+                  </div>
+                  <div className="dropDownItem" onClick={() => navigate("/login")}>
+                    <i className="fa-solid fa-right-to-bracket"></i> Log in
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
-      {
-        isopen &&
-        <div className="dropDown">
-          {user ? (
-            <>
-          <p>{user.email}</p>
-          <div className="dropDownItem"><i className="fa-solid fa-gear"></i> Settings</div>
-          <div className="dropDownItem"><i className="fa-solid fa-cloud-arrow-up"></i> Upgrade Plan</div>
-          <div className="dropDownItem" onClick={handleLogout}><i className="fa-solid fa-arrow-right-from-bracket"></i> Log out</div>
-            </>
-          ) : (
-            <>
-            <div className="dropDownItem" onClick={() => navigate("/signup")}>
-              <i className="fa-solid fa-user-plus"></i> Sign up
-            </div>
-            <div className="dropDownItem" onClick={() => navigate("/login")}>
-              <i className="fa-solid fa-right-to-bracket"></i> Log in
-            </div>
-          </>
-        )}
-        </div>
-      }
       <Chat></Chat>
       <ScaleLoader color="#fff" loading={loading} />
 

@@ -85,7 +85,9 @@ function Login() {
     <AuthNavbar/>                         
     <div className="auth-bg">
       <div className="auth-card">
-        <h2>Login</h2>
+        <h2>Login
+          <div className="auth-sub">Welcome back — let’s get you in.</div>
+        </h2>
         <input
           type="email"
           placeholder="Email"

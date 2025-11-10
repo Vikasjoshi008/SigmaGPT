@@ -90,7 +90,9 @@ function Signup() {
     <AuthNavbar />
     <div className="auth-bg">
       <div className="auth-card">
-        <h2>Sign Up</h2>
+        <h2>Sign Up
+          <div className="auth-sub">Create your account to start chatting.</div>
+        </h2>
         <input
           type="text"
           placeholder="Name"
