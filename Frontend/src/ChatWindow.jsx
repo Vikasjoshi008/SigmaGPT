@@ -28,122 +28,116 @@ function ChatWindow({ user }) {
   const recognitionRef = useRef(null);
   const interimRef = useRef(""); // interim transcript
   const finalRef = useRef("");   // final transcript
+  const lastSentRef = useRef(""); // last user message actually sent
   const token = localStorage.getItem("token");
 
-  // --- No-op to prevent errors if you later add TTS ---
+  // no-op to avoid errors if you add TTS later
   const stopSpeak = () => {};
 
-  // --- SpeechRecognition setup (desktop + Android Chrome) ---
+  // ---- SpeechRecognition setup (desktop + Android Chrome) ----
   useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      setSupportsSR(false);
-      return;
-    }
-    setSupportsSR(true);
+    (async () => {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    const rec = new SR();
-    rec.lang = "en-IN";
-    rec.interimResults = true;
-    rec.continuous = false;
-    recognitionRef.current = rec;
-
-    rec.onstart = () => {
-      interimRef.current = "";
-      finalRef.current = "";
-      setIsListening(true);
-    };
-
-    rec.onresult = (e) => {
-      let interim = "";
-      let final = finalRef.current;
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) final += t;
-        else interim += t;
+      // optional: log permission state if supported
+      if (navigator.permissions?.query) {
+        try {
+          const st = await navigator.permissions.query({ name: "microphone" });
+          console.log("Mic permission state:", st.state);
+        } catch {}
       }
-      finalRef.current = final;
-      const display = (final + " " + interim).trim();
-      setPrompt(display);
-    };
 
-    rec.onerror = (e) => {
-    console.warn("Speech error:", e.error);
-    setIsListening(false);
-    if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-      alert("Microphone permission is blocked. In Chrome: lock icon → Microphone → Allow, or Settings → Site settings → Microphone.");
-    } else if (e.error === "audio-capture") {
-      alert("No microphone detected or permission blocked in OS settings.");
-    } else if (e.error === "no-speech") {
-      // user was silent; not a real failure
-    }
-  };
-
-
-    rec.onend = async () => {
-      setIsListening(false);
-      const text = (finalRef.current || "").trim();
-      if (!text) return;
-
-      setPrompt(text);
-      if (!user) {
-        alert("Sign up or login to chat with SigmaGPT");
+      if (!SR) {
+        setSupportsSR(false);
         return;
       }
-      // Auto-send after speech ends:
-      await getReply(text);
-    };
+      setSupportsSR(true);
+
+      const rec = new SR();
+      rec.lang = "en-IN";
+      rec.interimResults = true;
+      rec.continuous = false;
+      recognitionRef.current = rec;
+
+      rec.onstart = () => {
+        interimRef.current = "";
+        finalRef.current = "";
+        setIsListening(true);
+      };
+
+      rec.onresult = (e) => {
+        let interim = "";
+        let final = finalRef.current;
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) final += t;
+          else interim += t;
+        }
+        finalRef.current = final;
+        setPrompt((final + " " + interim).trim());
+      };
+
+      rec.onerror = (e) => {
+        console.warn("Speech error:", e.error);
+        setIsListening(false);
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+          alert("Microphone permission is blocked. In Chrome: lock icon → Microphone → Allow, or Settings → Site settings → Microphone.");
+        } else if (e.error === "audio-capture") {
+          alert("No microphone detected or permission blocked in OS settings.");
+        }
+      };
+
+      rec.onend = async () => {
+        setIsListening(false);
+        const text = (finalRef.current || "").trim();
+        if (!text) return;
+        setPrompt(text);
+        if (!user) { alert("Sign up or login to chat with SigmaGPT"); return; }
+        await getReply(text); // append handled after reply via lastSentRef
+      };
+    })();
 
     return () => {
-      try {
-        recognitionRef.current?.stop();
-      } catch {}
+      try { recognitionRef.current?.stop(); } catch {}
     };
   }, [user, setPrompt]);
 
-  // --- Mic toggle (must call start() directly in click handler on mobile) ---
+  // ---- Mic toggle (preflight permission, then start inside click) ----
   const toggleMic = async () => {
-  const rec = recognitionRef.current;
+    const rec = recognitionRef.current;
 
-  if (!rec) {
-    alert("Voice input isn’t supported on this browser. Try Chrome on Android, or use the keyboard.");
-    return;
-  }
-
-  stopSpeak();
-
-  try {
-    if (isListening) {
-      rec.stop();
+    if (!rec) {
+      alert("Voice input isn’t supported on this browser. Try Chrome on Android, or use the keyboard.");
       return;
     }
 
-    // ✅ Preflight mic permission (prompts user once)
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // immediately release the mic so SR can use it
-    stream.getTracks().forEach(t => t.stop());
+    stopSpeak();
 
-    // ✅ Now start SR in the same user gesture
-    rec.start();
-  } catch (err) {
-    // If user denied, you’ll land here
-    console.warn("getUserMedia error:", err?.name || err, err?.message);
-    alert("Microphone permission denied. Enable it in your browser/phone settings and try again.");
-  }
-};
+    try {
+      if (isListening) {
+        rec.stop();
+        return;
+      }
 
+      // preflight: triggers permission prompt (HTTPS + user gesture required)
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // free mic so SR can use it
+      stream.getTracks().forEach(t => t.stop());
 
-  // --- Send message to backend (uses override if provided) ---
+      rec.start(); // must be called directly in click handler on mobile
+    } catch (err) {
+      console.warn("getUserMedia error:", err?.name || err, err?.message);
+      alert("Microphone permission denied. Enable it in your browser/phone settings and try again.");
+    }
+  };
+
+  // ---- Send message to backend (uses override text if provided) ----
   const getReply = async (overrideText) => {
     const msg = (overrideText ?? prompt ?? "").trim();
-    if (!msg) {
-      console.warn("Skip send: empty message");
-      return;
-    }
-    if (!currThreadId) {
-      console.warn("Skip send: missing threadId");
-      return;
-    }
+    if (!msg) { console.warn("Skip send: empty message"); return; }
+    if (!currThreadId) { console.warn("Skip send: missing threadId"); return; }
+
+    lastSentRef.current = msg; // remember what we actually sent
 
     setLoading(true);
     setNewChat(false);
@@ -157,7 +151,7 @@ function ChatWindow({ user }) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        message: msg, // ✅ use msg (not stale prompt)
+        message: msg,
         threadId: currThreadId,
         history,
       }),
@@ -170,7 +164,7 @@ function ChatWindow({ user }) {
         console.error("Chat error:", response.status, res);
         alert(res?.error || "Chat failed");
         return;
-        }
+      }
       console.log(res.reply);
       setReply(res.reply);
     } catch (err) {
@@ -180,17 +174,22 @@ function ChatWindow({ user }) {
     }
   };
 
-  // --- Append new chat to history when reply arrives ---
+  // ---- Append to history ONLY when reply changes (not while typing) ----
   useEffect(() => {
-    if (prompt && reply) {
-      setPrevChats((prev) => [
-        ...prev,
-        { role: "user", content: prompt },
-        { role: "assistant", content: reply },
-      ]);
-      setPrompt("");
-    }
-  }, [reply, prompt, setPrevChats, setPrompt]);
+    if (!reply) return;
+    const sent = (lastSentRef.current || "").trim();
+    if (!sent) return;
+
+    setPrevChats((prev) => [
+      ...prev,
+      { role: "user", content: sent },
+      { role: "assistant", content: reply },
+    ]);
+
+    // reset for next turn
+    lastSentRef.current = "";
+    setPrompt("");
+  }, [reply, setPrevChats, setPrompt]);
 
   const handleProfileClick = () => setIsOpen(!isopen);
 
@@ -212,7 +211,7 @@ function ChatWindow({ user }) {
     }
   };
 
-  // --- VisualViewport (keep input above keyboard) ---
+  // ---- Keep input above mobile keyboards ----
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
@@ -287,7 +286,7 @@ function ChatWindow({ user }) {
                   alert("Signup or login to chat with SigmaGPT");
                   return;
                 }
-                getReply(msg); // send the actual input text
+                getReply(msg); // send the exact text
               }
             }}
           />
@@ -297,7 +296,7 @@ function ChatWindow({ user }) {
             type="button"
             className={`micBtn ${isListening ? "active" : ""}`}
             aria-label={isListening ? "Stop recording" : "Start recording"}
-            onClick={toggleMic} // For iOS fallback later, switch to onMicClick
+            onClick={toggleMic}
           >
             <i className="fa-solid fa-microphone"></i>
           </button>
@@ -311,7 +310,7 @@ function ChatWindow({ user }) {
                 return;
               }
               const msg = (prompt || "").trim();
-              if (msg) getReply(msg); // send the actual input text
+              if (msg) getReply(msg);
             }}
           >
             <i className="fa-solid fa-paper-plane"></i>
