@@ -68,12 +68,17 @@ function ChatWindow({ user }) {
     };
 
     rec.onerror = (e) => {
-      console.warn("Speech error:", e.error);
-      setIsListening(false);
-      if (e.error === "not-allowed") {
-        alert("Microphone permission denied. Enable it in browser/OS settings.");
-      }
-    };
+    console.warn("Speech error:", e.error);
+    setIsListening(false);
+    if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+      alert("Microphone permission is blocked. In Chrome: lock icon → Microphone → Allow, or Settings → Site settings → Microphone.");
+    } else if (e.error === "audio-capture") {
+      alert("No microphone detected or permission blocked in OS settings.");
+    } else if (e.error === "no-speech") {
+      // user was silent; not a real failure
+    }
+  };
+
 
     rec.onend = async () => {
       setIsListening(false);
@@ -97,19 +102,36 @@ function ChatWindow({ user }) {
   }, [user, setPrompt]);
 
   // --- Mic toggle (must call start() directly in click handler on mobile) ---
-  const toggleMic = () => {
-    if (!recognitionRef.current) {
-      alert("Voice input isn’t supported on this browser. Try Chrome on Android, or use the keyboard.");
+  const toggleMic = async () => {
+  const rec = recognitionRef.current;
+
+  if (!rec) {
+    alert("Voice input isn’t supported on this browser. Try Chrome on Android, or use the keyboard.");
+    return;
+  }
+
+  stopSpeak();
+
+  try {
+    if (isListening) {
+      rec.stop();
       return;
     }
-    stopSpeak();
-    try {
-      if (isListening) recognitionRef.current.stop();
-      else recognitionRef.current.start(); // call immediately on click
-    } catch (err) {
-      console.log(err);
-    }
-  };
+
+    // ✅ Preflight mic permission (prompts user once)
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // immediately release the mic so SR can use it
+    stream.getTracks().forEach(t => t.stop());
+
+    // ✅ Now start SR in the same user gesture
+    rec.start();
+  } catch (err) {
+    // If user denied, you’ll land here
+    console.warn("getUserMedia error:", err?.name || err, err?.message);
+    alert("Microphone permission denied. Enable it in your browser/phone settings and try again.");
+  }
+};
+
 
   // --- Send message to backend (uses override if provided) ---
   const getReply = async (overrideText) => {
