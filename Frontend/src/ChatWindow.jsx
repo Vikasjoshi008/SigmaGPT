@@ -102,12 +102,17 @@ function ChatWindow({user}) {
   };
 
   const toggleMic = () => {
-    if (!supportsSR) {
-      alert("Voice input not supported in this browser. Try Chrome.");
-      return;
+    if (!recognitionRef.current) return;
+    stopSpeak();
+     try {
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start(); // call immediately on click
     }
-    if (isListening) stopListening();
-    else startListening();
+  } catch(err) {
+    console.log(err);
+  }
   };
 
 
@@ -190,16 +195,6 @@ function ChatWindow({user}) {
   }
 };
 
-// useEffect(() => {
-//   const input = document.querySelector(".inputBox input");
-//   if (input) {
-//     input.addEventListener("focus", () => {
-//       setTimeout(() => {
-//         input.scrollIntoView({ behavior: "smooth", block: "center" });
-//       }, 300);
-//     });
-//   }
-// }, []);
  useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
@@ -218,9 +213,6 @@ function ChatWindow({user}) {
       vv.removeEventListener("scroll", apply);
     };
   }, []);
-
-
-
 
   return (
     <div className="chatWindow">
@@ -283,7 +275,7 @@ function ChatWindow({user}) {
             className={`micBtn ${isListening ? "active" : ""}`}
             aria-label={isListening ? "Stop recording" : "Start recording"}
             onClick={toggleMic}
-          >
+            >
             <i className="fa-solid fa-microphone"></i>
           </button>
           <div id="submit" onClick={() => {
