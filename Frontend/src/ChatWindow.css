@@ -17,7 +17,7 @@
 
 @media (max-width: 480px) {
     .chatWindow {
-        align-items: center;
+        /* align-items: center; */
         padding-top: 8px;
         padding-bottom: 12px;
         text-align: center; /* center fallback for text */
@@ -59,16 +59,16 @@
 
     /* center and enlarge input text for easier typing on mobile */
     .inputBox {
-        width: calc(100% - 24px);
-        margin: 0.8rem 12px 1rem 12px;
-        padding: 0.6rem 0.9rem;
-        border-radius: 18px;
+        /* width: calc(100% - 24px); */
+        /* margin: 0.8rem 12px 1rem 12px; */
+        /* padding: 0.6rem 0.9rem; */
+        border-radius: 3rem;
     }
 
     input {
-        padding: 14px;
+        /* padding: 14px; */
         font-size: 1.05rem;
-        text-align: center;
+        /* text-align: center; */
     }
 
     #submit i {
@@ -191,9 +191,9 @@
 
 .inputBox {
     background-color: #303030;
-    width: 90%;
-    max-width: 800px;
-    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 900px;
+    border-radius: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -222,6 +222,7 @@ input:focus {
 #submit i {
     color: #808080;
     font-size: 1.2rem;
+    padding-top: 10px;
     transition: all 0.3s ease;
 }
 
@@ -321,4 +322,48 @@ input:focus {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
+}
+
+/* ////////////// * mic/ 
+/* make room for the mic + send */
+.inputBox{
+  display: grid;
+  grid-template-columns: 1fr 46px 46px;  /* was 1fr 46px */
+  gap: 10px;
+  /* ...rest unchanged... */
+}
+
+/* mic button */
+.micBtn{
+  display: grid; place-items: center;
+  width: 46px; height: 46px; border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  color: inherit; cursor: pointer;
+  transition: transform .06s ease, filter .2s ease, box-shadow .25s ease;
+}
+.micBtn:hover{ background: rgba(255,255,255,.07); box-shadow: 0 10px 22px rgba(0,0,0,.25); }
+.micBtn:active{ transform: translateY(1px) scale(.98); }
+
+/* recording state */
+.micBtn.active{
+  background: rgba(239,68,68,.15);
+  border-color: rgba(239,68,68,.35);
+  box-shadow: 0 0 0 6px rgba(239,68,68,.15);
+  animation: pulseMic 1s ease-in-out infinite;
+}
+@keyframes pulseMic {
+  0%,100% { box-shadow: 0 0 0 6px rgba(239,68,68,.15); }
+  50%     { box-shadow: 0 0 0 10px rgba(239,68,68,.25); }
+}
+
+@media (max-width: 768px){
+  .inputBox{ grid-template-columns: 1fr 44px 44px; }
+  .micBtn{ width: 44px; height: 44px; border-radius: 10px; }
+  #submit{ width: 44px; height: 44px; }
+}
+@media (max-width: 480px){
+  .inputBox{ grid-template-columns: 1fr 42px 42px; }
+  .micBtn{ width: 42px; height: 42px; }
+  #submit{ width: 42px; height: 42px; }
 }
