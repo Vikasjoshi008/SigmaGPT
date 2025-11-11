@@ -50,135 +50,112 @@
 
 // export default getGeminiAIAPIResponse;
 
-
 import "dotenv/config";
 
 /**
- * Accepts either:
- *  - a string (single user prompt), or
- *  - an array of messages: [{ role: "system"|"user"|"assistant", content: "..." }]
- * Returns: { response: string }
+ * getGeminiAIAPIResponse(input)
+ * - input can be a string OR an array of messages [{ role:"system"|"user"|"assistant", content:"..." }]
+ * - returns { response: string }
  */
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash"; // safe default
-const ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent`;
-
-function toGeminiPayload(input) {
-  let contents = [];
-  let systemText = "";
-
-  if (typeof input === "string") {
-    contents = [{ role: "user", parts: [{ text: input }] }];
-    return { contents, systemText };
-  }
-
-  if (!Array.isArray(input)) {
-    throw new Error("getGeminiAIAPIResponse: input must be string or messages[]");
-  }
-
-  for (const m of input) {
-    if (!m || !m.content) continue;
-
-    if (m.role === "system") {
-      systemText += (systemText ? "\n\n" : "") + String(m.content);
-      continue;
-    }
-
-    const role =
-      m.role === "assistant" ? "model" :
-      m.role === "user"      ? "user"  :
-      "user";
-
-    contents.push({ role, parts: [{ text: String(m.content) }] });
-  }
-
-  return { contents, systemText };
-}
-
-export default async function getGeminiAIAPIResponse(input) {
+const getGeminiAIAPIResponse = async (input) => {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error("[Gemini] Missing GEMINI_API_KEY");
-      return { response: "Server missing configuration (GEMINI_API_KEY)." };
+    const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+    // --- Build contents[] for Gemini REST ---
+    // If input is a string -> single user message
+    // If array -> convert to {role: "user"|"model", parts:[{text}]} list
+    let contents = [];
+
+    if (typeof input === "string") {
+      contents = [
+        {
+          role: "user",
+          parts: [{ text: input }],
+        },
+      ];
+    } else if (Array.isArray(input)) {
+      let systemBuffer = ""; // accumulate system text to fold into first user msg
+
+      for (const m of input) {
+        if (!m || !m.content) continue;
+
+        if (m.role === "system") {
+          // Gemini REST has no system role; fold it into context as user text
+          systemBuffer += (systemBuffer ? "\n\n" : "") + String(m.content);
+          continue;
+        }
+
+        const role = m.role === "assistant" ? "model" : "user";
+        const text = String(m.content);
+
+        // If we have system context waiting and this is the first real user turn, prepend it
+        if (systemBuffer && role === "user" && contents.length === 0) {
+          contents.push({
+            role: "user",
+            parts: [{ text: systemBuffer + "\n\n" + text }],
+          });
+          systemBuffer = "";
+        } else {
+          contents.push({ role, parts: [{ text }] });
+        }
+      }
+
+      // If conversation had only assistant messages after system, still inject system once
+      if (systemBuffer && contents.length === 0) {
+        contents.push({ role: "user", parts: [{ text: systemBuffer }] });
+      }
+    } else {
+      return { response: "Invalid input for Gemini helper." };
     }
 
-    const { contents, systemText } = toGeminiPayload(input);
+    const payload = { contents };
 
-    const payload = {
-      contents,
-      ...(systemText && {
-        systemInstruction: { role: "system", parts: [{ text: systemText }] },
-      }),
-      generationConfig: {
-        temperature: 0.6,
-        topK: 40,
-        topP: 0.9,
-        maxOutputTokens: 1024,
-      },
-      // Optional: relax safety a bit while testing (comment out if not needed)
-      // safetySettings: [
-      //   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-      //   { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-      //   { category: "HARM_CATEGORY_SEXUAL_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
-      //   { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
-      // ],
-    };
-
-    const url = `${ENDPOINT}?key=${apiKey}`;
-    const resp = await fetch(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const raw = await resp.text();
-
-    // Helpful logging in dev only
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[Gemini] Request →", JSON.stringify(payload).slice(0, 1200), "…");
-      console.log("[Gemini] Status:", resp.status);
-      console.log("[Gemini] Raw:", raw.slice(0, 1200), "…");
-    }
+    const rawText = await response.text();
 
     let data;
     try {
-      data = JSON.parse(raw);
-    } catch (e) {
-      console.error("[Gemini] JSON parse error:", e?.message);
-      return { response: "Upstream response was not valid JSON." };
+      data = JSON.parse(rawText);
+    } catch (err) {
+      console.error("Failed to parse JSON:", err.message, "\nRaw:", rawText.slice(0, 400));
+      return { response: "Upstream returned invalid JSON." };
     }
 
-    // Handle API errors
-    if (!resp.ok || data.error) {
-      console.error("[Gemini] API Error:", data.error || resp.statusText);
-      return { response: data?.error?.message || "The model could not generate a reply." };
+    // API error handling
+    if (!response.ok || data.error) {
+      const msg = data?.error?.message || response.statusText || "Model error";
+      console.error("Gemini API error:", msg);
+      return { response: msg };
     }
 
-    // Handle safety/prompt feedback
+    // Safety/prompt block check
     const block = data?.promptFeedback?.blockReason;
     if (block) {
-      console.warn("[Gemini] Prompt blocked:", block);
+      console.warn("Prompt blocked:", block);
       return { response: "I can't answer that due to safety filters." };
     }
 
-    const candidate = data?.candidates?.[0];
-    if (!candidate) {
-      console.warn("[Gemini] No candidates");
-      return { response: "I couldn't generate a reply." };
-    }
-
-    const finish = candidate.finishReason;
-    if (finish && finish !== "STOP") {
-      // e.g., SAFETY, RECITATION, OTHER
-      console.warn("[Gemini] Finish reason:", finish);
-    }
-
-    const parts = candidate?.content?.parts || [];
+    // Extract text from candidates
+    const parts = data?.candidates?.[0]?.content?.parts || [];
     const text = parts.map(p => p?.text).filter(Boolean).join("\n").trim();
 
-    return { response: text || "Sorry, I couldn't generate a reply." };
+    if (text) {
+      // console.log("Gemini response:", text);
+      return { response: text };
+    } else {
+      console.error("Unexpected response format:", JSON.stringify(data)?.slice(0, 400));
+      return { response: "Sorry, I couldn't generate a reply." };
+    }
   } catch (err) {
-    console.error("[Gemini] Helper error:", err);
-    return { response: "Internal error while generating a reply." };
+    console.error("Internal error:", err);
+    return { response: "Internal server error while generating a reply." };
   }
-}
+};
+
+export default getGeminiAIAPIResponse;
