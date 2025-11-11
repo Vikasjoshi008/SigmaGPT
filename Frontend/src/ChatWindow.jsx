@@ -30,6 +30,7 @@ function ChatWindow({user}) {
     setLoading(true);
     setNewChat(false)
     console.log("message", prompt, "threadId", currThreadId);
+        const history = prevChats.slice(-8);
         const options= {
             method: "post",
             headers: {
@@ -38,7 +39,8 @@ function ChatWindow({user}) {
             },
             body: JSON.stringify({
                 message: prompt,
-                threadId: currThreadId
+                threadId: currThreadId,
+                history
             }),
         };
 

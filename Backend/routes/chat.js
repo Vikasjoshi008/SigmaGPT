@@ -88,37 +88,87 @@ router.delete("/thread/:threadId", requireAuth, async(req, res) => {
 ////////chat user history
 
 // updated chat route to associate threads with users
-router.post("/chat", requireAuth, async(req, res) => {
-    console.log("🔍 req.user:", req.user); // <--- Add this
-    const {threadId, message} = req.body;
+// router.post("/chat", requireAuth, async(req, res) => {
+//     console.log("🔍 req.user:", req.user); // <--- Add this
+//     const {threadId, message, history=[]} = req.body;
 
-    if(!threadId || !message) {
-        return res.status(400).json({error: "missing required fields"});
+//     if(!threadId || !message) {
+//         return res.status(400).json({error: "missing required fields"});
+//     }
+//     try {
+//         const userId = new mongoose.Types.ObjectId(req.user.id);
+//         let thread = await Thread.findOne({ threadId, user: userId });
+//         if (!thread) {
+//             thread = new Thread({
+//                 threadId,
+//                 user: new mongoose.Types.ObjectId(req.user.id),
+//                 title: message,
+//                 messages: [{ role: "user", content: message }],
+//             });
+//         } else {
+//             thread.messages.push({role: "user", content: message});
+//         }
+//         const assistantReply= await getGeminiAIAPIResponse(message);
+//         const replyText=assistantReply.response || "Sorry, I couldn't generate a reply.";
+//         thread.messages.push({ role: "assistant", content: replyText });
+//         thread.updatedAt=new Date();
+//         await thread.save();
+//         res.json({reply: replyText});
+//     } catch (err) {
+//         console.log("Failed to post", err);
+//         return res.status(500).json({error: "something went wrong"});
+//     }
+// });
+
+router.post("/chat", requireAuth, async (req, res) => {
+  const { threadId, message, history = [] } = req.body;
+  if (!threadId || !message) {
+    return res.status(400).json({ error: "missing required fields" });
+  }
+
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+
+    // 1) Load or create thread
+    let thread = await Thread.findOne({ threadId, user: userId });
+    if (!thread) {
+      thread = new Thread({
+        threadId,
+        user: userId,
+        title: message,
+        messages: [{ role: "user", content: message }],
+      });
+    } else {
+      thread.messages.push({ role: "user", content: message });
     }
-    try {
-        const userId = new mongoose.Types.ObjectId(req.user.id);
-        let thread = await Thread.findOne({ threadId, user: userId });
-        if (!thread) {
-            thread = new Thread({
-                threadId,
-                user: new mongoose.Types.ObjectId(req.user.id),
-                title: message,
-                messages: [{ role: "user", content: message }],
-            });
-        } else {
-            thread.messages.push({role: "user", content: message});
-        }
-        const assistantReply= await getGeminiAIAPIResponse(message);
-        const replyText=assistantReply.response || "Sorry, I couldn't generate a reply.";
-        thread.messages.push({ role: "assistant", content: replyText });
-        thread.updatedAt=new Date();
-        await thread.save();
-        res.json({reply: replyText});
-    } catch (err) {
-        console.log("Failed to post", err);
-        return res.status(500).json({error: "something went wrong"});
-    }
+
+    // 2) Build messages with a system prompt + recent history + current user message
+    const systemMsg = {
+      role: "system",
+      content:
+        "You are SigmaGPT. Always use the conversation so far. When the user refers to 'it', resolve what 'it' is from the latest relevant code or answer you gave. Be concise unless asked to elaborate."
+    };
+
+    // Ensure roles are correct and cap history to last 8 turns to keep prompt small
+    const recent = Array.isArray(history) ? history.slice(-8) : [];
+    const messages = [systemMsg, ...recent, { role: "user", content: message }];
+
+    // 3) Call your model with messages (update your helper accordingly)
+    const assistantReply = await getGeminiAIAPIResponse(messages); // <-- now expects an array of messages
+    const replyText = assistantReply?.response || "Sorry, I couldn't generate a reply.";
+
+    // 4) Save assistant message and respond
+    thread.messages.push({ role: "assistant", content: replyText });
+    thread.updatedAt = new Date();
+    await thread.save();
+
+    return res.json({ reply: replyText });
+  } catch (err) {
+    console.error("Failed to post", err);
+    return res.status(500).json({ error: "something went wrong" });
+  }
 });
+
 
 
 export default router;
