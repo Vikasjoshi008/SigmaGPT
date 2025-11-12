@@ -1,4 +1,5 @@
 import express from 'express';
+import fetch from "node-fetch"; // or global fetch if available
 import Thread from '../models/Thread.js'
 import  getGeminiAIAPIResponse from "../utils/geminiai.js"
 import {requireAuth} from './requireAuth.js'
@@ -86,6 +87,47 @@ router.delete("/thread/:threadId", requireAuth, async(req, res) => {
   }
 });
 ////////chat user history
+
+// debug-route.js (temporary — remove after debugging)
+
+
+router.get("/debug/key", async (req, res) => {
+  try {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) return res.status(500).json({ ok: false, error: "No API key present in env" });
+
+    // protect: show length only, never full key
+    const visible = `${key.slice(0, 6)}...${key.slice(-6)}`;
+    const keyLen = key.length;
+
+    // quick lightweight test for Google Generative endpoint (no-charge simple request)
+    const model ="gemini-2.5-flash";
+    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${key}`;
+
+    const payload = {
+      contents: [{ role: "user", parts: [{ text: "Say hello" }] }],
+      temperature: 0.2,
+      maxOutputTokens: 16
+    };
+
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const raw = await r.text();
+    return res.json({
+      ok: true,
+      keyPreview: visible,
+      keyLen,
+      status: r.status,
+      upstream: raw.slice(0, 1000) // truncated
+    });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 // updated chat route to associate threads with users
 // router.post("/chat", requireAuth, async(req, res) => {
