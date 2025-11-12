@@ -7,6 +7,7 @@ import ChatWindow from "./ChatWindow.jsx";
 import { MyContext } from "./MyContext.jsx";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
+import AuthLoader from "./AuthLoader.jsx";
 
 function App() {
   const [prompt, setPrompt] = useState("");
@@ -16,6 +17,7 @@ function App() {
   const [newChat, setNewChat] = useState(true);
   const [allThreads, setAllThreads] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
 
   const providerValues = {
     prompt, setPrompt,
@@ -24,7 +26,8 @@ function App() {
     newChat, setNewChat,
     prevChats, setPrevChats,
     allThreads, setAllThreads,
-    sidebarOpen, setSidebarOpen
+    sidebarOpen, setSidebarOpen,
+    authLoading, setAuthLoading
   };
   const [user, setUser]=useState(null)
 
@@ -58,6 +61,7 @@ function App() {
             } />
           </Routes>
         </Router>
+        <AuthLoader visible={authLoading} label="Processing…" />
       </MyContext.Provider>
     </div>
   );

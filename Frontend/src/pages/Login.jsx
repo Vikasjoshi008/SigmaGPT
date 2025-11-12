@@ -1,62 +1,64 @@
-import "./Signup.css";
-import { useState } from "react";
+import "./Login.css";
+import { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import AuthNavbar from "./AuthNavbar.jsx";
-import { auth, provider, signInWithPopup } from "../firebase.js";
+import AuthNavbar from "../components/AuthNavbar.jsx";
+import { auth, provider, signInWithPopup } from "../../firebase.js";
+import { MyContext } from "../MyContext.jsx";
 
-
-function Signup() {
-  const [name, setName] = useState("");
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+  const {setAuthLoading}= useContext(MyContext);
   const navigate = useNavigate();
-  
 
-  const handleSignup = async () => {
-    try {
-       if (!name || !email || !password) {
+  const handleLogin = async () => {
+      if (!email || !password) {
         alert("All fields are required");
         return;
       }
-      if (password.length < 6) {
-        alert("Password must be at least 6 characters");
-        return;
-      }      
+      setAuthLoading(true)
       setLoading(true);
-      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/signup", {
+    try {
+      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/login", {
         method: "POST",
-        // credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      
-      if (res.ok && data.token && data.user) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        window.dispatchEvent(new Event("storage"));
-        navigate("/chat"); // ✅ ensures token is saved
-        window.location.reload(); 
-        // window.dispatchEvent(new Event("storage")); // ✅ triggers App.jsx to update
+      console.log(data);
+      if (res.ok) {
+            alert("Login successful!");
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            navigate("/chat");
+            window.location.reload(); 
       } else {
-        alert(data.error || "Signup failed");
+        if ((data.error && data.error.toLowerCase().includes("not found")) || (data.message && data.message.toLowerCase().includes("not found"))) {
+          alert("This user is not registered, please sign up.");
+        } else {
+          alert(data.error || "Login failed");
+        }
       }
     } catch (err) {
       console.error(err);
       alert("Server error");
+    } finally {
+      setAuthLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+   const handleGoogleLogin = async () => {
   try {
+    setAuthLoading(true);
     const result = await signInWithPopup(auth, provider);
     const idToken = await result.user.getIdToken(true); // 🔥 Firebase ID token
 
     if (!idToken) {
       alert("Failed to retrieve Firebase token");
+      setAuthLoading(false);
       return;
     }
     // Verify token length and format before sending
@@ -82,24 +84,19 @@ function Signup() {
   } catch (err) {
     console.error("Google login error (detailed):", err.name, err.message, err.code);
     alert(`Google login failed: ${err.message}`);
+  } finally {
+    setAuthLoading(false);
   }
 };
 
   return (
     <>
-    <AuthNavbar />
+    <AuthNavbar/>                         
     <div className="auth-bg">
       <div className="auth-card">
-        <h2>Sign Up
-          <div className="auth-sub">Create your account to start chatting.</div>
+        <h2>Login
+          <div className="auth-sub">Welcome back — let’s get you in.</div>
         </h2>
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="auth-input"
-        />
         <input
           type="email"
           placeholder="Email"
@@ -125,15 +122,15 @@ function Signup() {
         </span>
         )}
         </div>
-        <button className="auth-btn" disabled={loading} onClick={handleSignup}>
-        {loading ? "Creating account..." : "Create Account"}
+        <button className="auth-btn" disabled={loading} onClick={handleLogin}>
+          {loading ? "Logging in..." : "Login"}
         </button>
         <button className="googleBtn" onClick={handleGoogleLogin}>
           <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" style={{ width: "20px", marginRight: "8px" }} />
           Continue with Google
         </button>
         <div className="switch-link">
-          Already have an account? <Link to="/login">Login</Link>
+          Don't have an account? <Link to="/signup">Sign up</Link>
         </div>
       </div>
     </div>
@@ -141,4 +138,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Login;
