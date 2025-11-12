@@ -1,4 +1,4 @@
-import "./AuthNavbar.css";
+import "../styles/AuthNavbar.css";
 
 import { Link, useLocation } from "react-router-dom";
 

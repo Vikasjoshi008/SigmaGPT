@@ -1,4 +1,4 @@
-import "./AuthLoader.css";
+import "../styles/AuthLoader.css";
 
 export default function AuthLoader({ visible, label = "Loading..." }) {
   if (!visible) return null;

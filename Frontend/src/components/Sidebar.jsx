@@ -1,4 +1,4 @@
-import "./Sidebar.css";
+import "../styles/Sidebar.css";
 import { MyContext } from "../MyContext";
 import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
