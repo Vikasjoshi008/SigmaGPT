@@ -1,13 +1,13 @@
 import "./styles/App.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Signup from "./Signup.jsx";
-import Login from "./Login.jsx";
-import Sidebar from "./Sidebar.jsx";
-import ChatWindow from "./ChatWindow.jsx";
+import Signup from "./pages/Signup.jsx";
+import Login from "./pages/Login.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+import ChatWindow from "./components/ChatWindow.jsx";
 import { MyContext } from "./MyContext.jsx";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import AuthLoader from "./AuthLoader.jsx";
+import AuthLoader from "./components/AuthLoader.jsx";
 
 function App() {
   const [prompt, setPrompt] = useState("");
