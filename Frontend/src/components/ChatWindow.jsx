@@ -92,7 +92,7 @@ function ChatWindow({ user }) {
         const text = (finalRef.current || "").trim();
         if (!text) return;
         setPrompt(text);
-        if (!user) { alert("Sign up or login to chat with SigmaGPT"); return; }
+        if (!user) { alert("Sign up or login to chat with Nexora"); return; }
         await getReply(text); // append handled after reply via lastSentRef
       };
     })();
@@ -275,7 +275,7 @@ function ChatWindow({ user }) {
         <div className="inputBox">
           <input
             type="text"
-            placeholder="Ask SigmaGPT"
+            placeholder="Ask Nexora"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={(e) => {
@@ -283,7 +283,7 @@ function ChatWindow({ user }) {
                 const msg = (prompt || "").trim();
                 if (!msg) return;
                 if (!user) {
-                  alert("Signup or login to chat with SigmaGPT");
+                  alert("Signup or login to chat with Nexora");
                   return;
                 }
                 getReply(msg); // send the exact text
@@ -306,7 +306,7 @@ function ChatWindow({ user }) {
             id="submit"
             onClick={() => {
               if (!user) {
-                alert("Sign up or login to chat with SigmaGPT");
+                alert("Sign up or login to chat with Nexora");
                 return;
               }
               const msg = (prompt || "").trim();

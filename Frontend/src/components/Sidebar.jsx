@@ -2,7 +2,6 @@ import "../styles/Sidebar.css";
 import { MyContext } from "../MyContext";
 import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Link } from "react-router-dom";
 
 function Sidebar({user}) {
   const {
@@ -128,7 +127,7 @@ function Sidebar({user}) {
       </div>
               {/* Logo at top */}
         <div className="sidebarLogo">
-          <h3>SigmaGPT</h3>
+          <h3>Nexora</h3>
         </div>
       {/* new chat button */}
       <button onClick={createNewChat}>
@@ -138,7 +137,7 @@ function Sidebar({user}) {
       {/* history */}
       <ul className="history">
         {!user ? (
-          <li className="no-history-msg"><h3><a href="/signup">signp</a> to use SigmaGPT</h3></li>
+          <li className="no-history-msg"><h3><a href="/signup">signp</a> to use Nexora</h3></li>
         ) : allThreads?.length === 0 ? (
           <li className="no-history-msg"><h3>No history available.</h3></li>
         ) : (

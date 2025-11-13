@@ -75,7 +75,7 @@ function Chat() {
         <>
             {newChat && (
                 <h1 className={`multiColorName`}>
-                    {user ? <>Hi <b>{user.name}</b>, How can I help you?</> : <><a href="/signup" style={{textDecoration: "none"}}>Signup</a> to use SigmaGPT</>}
+                    {user ? <>Hi <b>{user.name}</b>, How can I help you?</> : <><a href="/signup" style={{textDecoration: "none"}}>Signup</a> to use Nexora <p>Nexora — Where ideas meet intelligence.</p></>}
                 </h1>
             )}
             <div className="chats" ref={chatsContainerRef}>
