@@ -158,7 +158,7 @@ function ChatWindow({ user }) {
     };
 
     try {
-      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/chat", options);
+      const response = await fetch("https://nexora-c41k.onrender.com/api/chat", options);
       const res = await response.json();
       if (!response.ok) {
         console.error("Chat error:", response.status, res);
@@ -195,7 +195,7 @@ function ChatWindow({ user }) {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/logout", {
+      const res = await fetch("https://nexora-c41k.onrender.com/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });

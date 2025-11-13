@@ -21,7 +21,7 @@ function Login() {
       setAuthLoading(true)
       setLoading(true);
     try {
-      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/login", {
+      const res = await fetch("https://nexora-c41k.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -65,7 +65,7 @@ function Login() {
     console.log("Firebase ID Token retrieved (length):", idToken.length);
     console.log("Firebase ID Token prefix check:", idToken.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
 
-    const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/firebase", {
+    const res = await fetch("https://nexora-c41k.onrender.com/api/auth/firebase", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: idToken }),

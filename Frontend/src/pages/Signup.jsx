@@ -29,7 +29,7 @@ function Signup() {
         return;
       }
       setLoading(true);
-      const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/signup", {
+      const res = await fetch("https://nexora-c41k.onrender.com/api/auth/signup", {
         method: "POST",
         // credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -70,7 +70,7 @@ function Signup() {
     console.log("Firebase ID Token retrieved (length):", idToken.length);
     console.log("Firebase ID Token prefix check:", idToken.startsWith("eyJhbGciOiJSUzI1NiIsImtpZCI6"));
 
-    const res = await fetch("https://sigmagpt-fgqc.onrender.com/api/auth/firebase", {
+    const res = await fetch("https://nexora-c41k.onrender.com/api/auth/firebase", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: idToken }),

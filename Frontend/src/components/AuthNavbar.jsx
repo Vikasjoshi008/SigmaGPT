@@ -16,7 +16,7 @@ function AuthNavbar() {
     <header className="authNavbar" role="banner">
       <div className="authNavbar__inner">
         <Link to="/" className="logo" aria-label="SigmaGPT Home">
-          <img src="/Nexora_logo.png" alt="Nexora" className="logoImg"/>          
+          <img src="./public/Nexora_Logo.png" alt="Nexora" className="logoImg"/>          
         </Link>
 
         {(isLoginPage || isSignupPage) && (

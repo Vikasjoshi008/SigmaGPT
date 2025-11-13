@@ -24,7 +24,7 @@ function Sidebar({user}) {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const response = await fetch("https://sigmagpt-fgqc.onrender.com/api/history", {
+      const response = await fetch("https://nexora-c41k.onrender.com/api/history", {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -70,7 +70,7 @@ function Sidebar({user}) {
 
     try {
       const response = await fetch(
-        `https://sigmagpt-fgqc.onrender.com/api/thread/${newThreadId}`,
+        `https://nexora-c41k.onrender.com/api/thread/${newThreadId}`,
         {
           headers: {
             "Authorization": `Bearer ${token}`
@@ -97,7 +97,7 @@ function Sidebar({user}) {
     if (!token) return;
     try {
       const response = await fetch(
-        `https://sigmagpt-fgqc.onrender.com/api/thread/${threadId}`, 
+        `https://nexora-c41k.onrender.com/api/thread/${threadId}`, 
         {
           method: "DELETE",
           headers: {
