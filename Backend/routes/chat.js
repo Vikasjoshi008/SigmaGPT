@@ -88,80 +88,6 @@ router.delete("/thread/:threadId", requireAuth, async(req, res) => {
 });
 ////////chat user history
 
-// debug-route.js (temporary — remove after debugging)
-
-
-router.get("/debug/key", async (req, res) => {
-  try {
-    const key = process.env.GEMINI_API_KEY;
-    if (!key) return res.status(500).json({ ok: false, error: "No API key present in env" });
-
-    // protect: show length only, never full key
-    const visible = `${key.slice(0, 6)}...${key.slice(-6)}`;
-    const keyLen = key.length;
-
-    // quick lightweight test for Google Generative endpoint (no-charge simple request)
-    const model ="gemini-2.5-flash";
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${key}`;
-
-    const payload = {
-      contents: [{ role: "user", parts: [{ text: "Say hello" }] }],
-      temperature: 0.2,
-      maxOutputTokens: 16
-    };
-
-    const r = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const raw = await r.text();
-    return res.json({
-      ok: true,
-      keyPreview: visible,
-      keyLen,
-      status: r.status,
-      upstream: raw.slice(0, 1000) // truncated
-    });
-  } catch (err) {
-    return res.status(500).json({ ok: false, error: err.message });
-  }
-});
-
-// updated chat route to associate threads with users
-// router.post("/chat", requireAuth, async(req, res) => {
-//     console.log("🔍 req.user:", req.user); // <--- Add this
-//     const {threadId, message, history=[]} = req.body;
-
-//     if(!threadId || !message) {
-//         return res.status(400).json({error: "missing required fields"});
-//     }
-//     try {
-//         const userId = new mongoose.Types.ObjectId(req.user.id);
-//         let thread = await Thread.findOne({ threadId, user: userId });
-//         if (!thread) {
-//             thread = new Thread({
-//                 threadId,
-//                 user: new mongoose.Types.ObjectId(req.user.id),
-//                 title: message,
-//                 messages: [{ role: "user", content: message }],
-//             });
-//         } else {
-//             thread.messages.push({role: "user", content: message});
-//         }
-//         const assistantReply= await getGeminiAIAPIResponse(message);
-//         const replyText=assistantReply.response || "Sorry, I couldn't generate a reply.";
-//         thread.messages.push({ role: "assistant", content: replyText });
-//         thread.updatedAt=new Date();
-//         await thread.save();
-//         res.json({reply: replyText});
-//     } catch (err) {
-//         console.log("Failed to post", err);
-//         return res.status(500).json({error: "something went wrong"});
-//     }
-// });
-
 router.post("/chat", requireAuth, async (req, res) => {
   const { threadId, message, history = [] } = req.body;
   if (!threadId || !message) {
@@ -188,7 +114,7 @@ router.post("/chat", requireAuth, async (req, res) => {
     const systemMsg = {
       role: "system",
       content:
-        "You are SigmaGPT. Always use the conversation so far. When the user refers to 'it', resolve what 'it' is from the latest relevant code or answer you gave. Be concise unless asked to elaborate."
+        "You are Nexora. Always use the conversation so far. When the user refers to 'it', resolve what 'it' is from the latest relevant code or answer you gave. Be concise unless asked to elaborate. resolve 'who created you' and answer vikas joshi created me."
     };
 
     // Ensure roles are correct and cap history to last 8 turns to keep prompt small

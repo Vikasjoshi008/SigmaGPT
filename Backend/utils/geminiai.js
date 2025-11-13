@@ -7,7 +7,7 @@ import "dotenv/config";
  */
 const getGeminiAIAPIResponse = async (input) => {
   try {
-    const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const MODEL = "gemini-2.5-flash";
     const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     // --- Build contents[] for Gemini REST ---
