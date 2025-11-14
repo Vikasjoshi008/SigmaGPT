@@ -2,6 +2,7 @@ import "../styles/Sidebar.css";
 import { MyContext } from "../MyContext";
 import { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import AuthLoader from "./AuthLoader.jsx";
 
 function Sidebar({user}) {
   const {
@@ -16,12 +17,14 @@ function Sidebar({user}) {
     setCurrThreadId,
     setPrevChats,
   } = useContext(MyContext);
+  const {setAuthLoading}= useContext(MyContext);
   
   if (!sidebarOpen) return null; // ✅ hide sidebar when collapsed
 
 
   const getAllThreads = async () => {
     const token = localStorage.getItem("token");
+    setAuthLoading(true);
     if (!token) return;
     try {
       const response = await fetch("https://nexora-c41k.onrender.com/api/history", {
@@ -43,6 +46,8 @@ function Sidebar({user}) {
     } catch (err) {
       console.log(err);
       setAllThreads([]);
+    } finally {
+      setAuthLoading(false);
     }
   };
 
