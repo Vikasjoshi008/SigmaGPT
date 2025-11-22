@@ -12,12 +12,12 @@
 .authNavbar {
   position: fixed;
   inset: 0 0 auto 0;
+  margin-top: 1rem;
   z-index: 50;
   backdrop-filter: saturate(130%) blur(10px);
   -webkit-backdrop-filter: saturate(130%) blur(10px);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.06), transparent 50%),
-    var(--nav-bg);
+  background: transparent;
+  border-radius: 2rem;
   border-bottom: 1px solid var(--nav-border);
 }
 

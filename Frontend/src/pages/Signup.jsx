@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import AuthNavbar from "../components/AuthNavbar.jsx";
 import { auth, provider, signInWithPopup } from "../../firebase.js";
 import { MyContext } from "../MyContext.jsx";
+import Galaxy from "../components/Galaxy.jsx";
 
 
 function Signup() {
@@ -96,7 +97,13 @@ function Signup() {
 
   return (
     <>
-    <AuthNavbar />
+     <div className="login-root">
+        {/* Galaxy full-screen background */}
+      <Galaxy />
+      
+      <AuthNavbar />
+    
+    
     <div className="auth-bg">
       <div className="auth-card">
         <h2>Sign Up
@@ -145,6 +152,7 @@ function Signup() {
           Already have an account? <Link to="/login">Login</Link>
         </div>
       </div>
+    </div>
     </div>
     </>
   );

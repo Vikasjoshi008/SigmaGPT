@@ -1,0 +1,241 @@
+/* src/styles/RootPage.css */
+
+.landing-root {
+  background-color: #060010;
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  color: #f9fbff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+}
+
+/* Ensure Liquid Ether sits behind everything */
+.landing-root > *:first-child {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Foreground container */
+.landing-inner {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.5rem 2.5rem;
+}
+
+/* NAVBAR (glass pill like React Bits) */
+.landing-nav {
+  max-width: 960px;
+  margin: 0 auto;
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+/* Logo */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.nav-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1rem;
+  background: radial-gradient(circle at 20% 20%, #4f46e5, #1d1b4f);
+  box-shadow: 0 0 0 1px rgba(248, 250, 252, 0.4);
+}
+.nav-logo-text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.nav-link {
+  background: transparent;
+  border: none;
+  color: rgba(226, 232, 255, 0.8);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.4rem 0.7rem;
+}
+.nav-link:hover {
+  color: #ffffff;
+}
+
+/* Right side button */
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+.nav-cta {
+  border-radius: 999px;
+  border: none;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+}
+
+/* HERO LAYOUT */
+.landing-hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* push to the right like React Bits */
+  position: relative;
+  left: 6rem;
+  padding: 1.5rem 0;
+}
+
+.hero-copy {
+  max-width: 520px;
+  margin-right: min(6vw, 72px);
+}
+
+/* pill text */
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: rgba(226, 232, 240, 0.8);
+}
+.hero-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #a855f7, #6366f1);
+}
+
+/* main title */
+.hero-title {
+  margin: 0.9rem 0 0.4rem;
+  font-size: clamp(2rem, 3vw + 1.4rem, 3rem);
+  line-height: 1.1;
+  font-weight: 700;
+}
+.hero-gradient-word {
+  background: linear-gradient(135deg, #3b82f6, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* subtitle with name */
+.hero-subtitle {
+  margin-top: 0.6rem;
+  font-size: 1rem;
+  color: rgba(226, 232, 240, 0.9);
+}
+.hero-name {
+  background: linear-gradient(90deg, #60a5fa, #a5b4fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+
+/* Buttons */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+.hero-primary,
+.hero-secondary {
+  border-radius: 999px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.hero-primary {
+  border: none;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.5);
+}
+.hero-secondary {
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.7);
+  color: rgba(226, 232, 240, 0.9);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .landing-inner {
+    padding: 1rem;
+  }
+
+  .landing-nav {
+    padding-inline: 1rem;
+  }
+
+  .landing-hero {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero-copy {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-nav {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .nav-links {
+    display: none; /* hide center links on very small screens */
+  }
+
+  .landing-hero {
+    padding-top: 1rem;
+    left: 0rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-primary,
+  .hero-secondary {
+    width: 90%;
+    justify-content: center;
+  }
+}

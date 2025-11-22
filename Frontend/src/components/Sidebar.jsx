@@ -24,7 +24,6 @@ function Sidebar({user}) {
 
   const getAllThreads = async () => {
     const token = localStorage.getItem("token");
-    setAuthLoading(true);
     if (!token) return;
     try {
       const response = await fetch("https://nexora-c41k.onrender.com/api/history", {
@@ -46,8 +45,6 @@ function Sidebar({user}) {
     } catch (err) {
       console.log(err);
       setAllThreads([]);
-    } finally {
-      setAuthLoading(false);
     }
   };
 
@@ -158,7 +155,7 @@ function Sidebar({user}) {
                   deleteThread(thread.threadId);
                 }}
               ></i>
-            </li>
+            </li>  
           ))
         )}
       </ul>

@@ -8,6 +8,7 @@ import { MyContext } from "./MyContext.jsx";
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AuthLoader from "./components/AuthLoader.jsx";
+import Home from "./components/Home.jsx";
 
 function App() {
   const [prompt, setPrompt] = useState("");
@@ -50,7 +51,7 @@ function App() {
       <MyContext.Provider value={providerValues}>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/chat" />} />
+            <Route path="/" element={<Home />}/>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/chat" element={
